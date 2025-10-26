@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H5P New Viewers</title>
+  <script src="./jquery-3.2.0.min.js"></script>
+
+<!-- 2. Include H5P core JavaScript files -->
+
+  <!-- Include H5P CSS -->
+  <link rel="stylesheet" href="./h5p.css">
+</head>
+<body>
+  <h1>H5P  New Content Viewer</h1>
+  <div id="h5p-container"></div>
+
+
+<script type="text/javascript" src="./main.bundle.js"></script>
+
+<script>
+  const el = document.getElementById('h5p-container');
+  const options = {
+    h5pJsonPath: './final',  
+    frameJs: './frame.bundle.js',
+    frameCss: './h5p.css',
+  };
+  new H5PStandalone.H5P(el, options);
+</script>
+<script>
+  window.onerror = function(message, source, lineno, colno, error) {
+    console.log("JavaScript Error: ", message, "at", source, ":", lineno);
+  };
+</script>
+</body>
+</html>
