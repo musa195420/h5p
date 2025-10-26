@@ -1,46 +1,87 @@
+// tempdir.dart
 import 'dart:io';
+import 'package:archive/archive_io.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Copies the entire 'web' folder (including all subfolders and files) to local storage.
-Future<String> copyWebFolder() async {
-  final directory = await getApplicationDocumentsDirectory();
-  final localPath = '${directory.path}/web_assets';
+/// Handles setup of the H5P environment.
+class H5PSetup {
+  final Dio _dio = Dio();
 
-  await Directory(localPath).create(recursive: true);
+  /// Copies the base H5P player files (HTML, JS, CSS) from assets to local folder.
+  Future<String> copyBaseFiles() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final finalDir = Directory('${dir.path}/base');
+    await finalDir.create(recursive: true);
 
-  final files = [
-    'index.html',
-    'h5p.css',
-    'frame.bundle.js',
-    'jquery-3.2.0.min.js',
-    'main.bundle.js',
-    'final/h5p.json',
-    'final/content/content.json',
-    'final/FontAwesome-4.5/fontawesome-webfont.eot',
-    'final/FontAwesome-4.5/fontawesome-webfont.svg',
-    'final/FontAwesome-4.5/fontawesome-webfont.ttf',
-    'final/FontAwesome-4.5/fontawesome-webfont.woff',
-  ];
+    final baseFiles = [
+      'index.html',
+      'h5p.css',
+      'frame.bundle.js',
+      'jquery-3.2.0.min.js',
+      'main.bundle.js',
+    ];
 
-  for (var file in files) {
-    await copyAssetFile('assets/web/$file', '$localPath/$file');
+    for (final fileName in baseFiles) {
+      await _copyAssetFile(
+          'assets/web/$fileName', '${finalDir.path}/$fileName');
+    }
+
+    print('✅ Base files copied to: ${finalDir.path}');
+    return finalDir.path;
   }
 
-  return localPath;
-}
+  /// Downloads a `.h5p` file, renames it to `.zip`, extracts to `/final`.
+  Future<void> downloadAndExtract(String url,
+      {Function(double)? onProgress}) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final tempH5p = File('${dir.path}/temp.h5p');
+    final tempZip = File('${dir.path}/temp.zip');
+    final extractPath = '${dir.path}/base/final';
 
-/// Copies a single asset file from the Flutter project to the local storage.
-Future<void> copyAssetFile(String assetPath, String targetPath) async {
-  try {
-    final byteData = await rootBundle.load(assetPath);
-    final buffer = byteData.buffer;
-    final targetFile = File(targetPath);
-    await targetFile.create(recursive: true);
-    await targetFile.writeAsBytes(
-      buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-    );
-  } catch (e) {
-    print('Error copying asset: $assetPath -> $e');
+    // Download .h5p file with progress callback
+    print('⬇️ Downloading H5P from $url ...');
+    await _dio.download(url, tempH5p.path,
+        onReceiveProgress: (received, total) {
+      if (total != -1 && onProgress != null) {
+        onProgress((received / total));
+      }
+    });
+
+    // Rename to .zip
+    if (await tempZip.exists()) await tempZip.delete();
+    await tempH5p.rename(tempZip.path);
+
+    // Extract
+    print('📦 Extracting H5P ...');
+    final bytes = await tempZip.readAsBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
+
+    for (final file in archive) {
+      final filename = '$extractPath/${file.name}';
+      if (file.isFile) {
+        final outFile = File(filename)..createSync(recursive: true);
+        await outFile.writeAsBytes(file.content as List<int>);
+      } else {
+        Directory(filename).createSync(recursive: true);
+      }
+    }
+
+    print('✅ Extraction done → $extractPath');
+  }
+
+  Future<void> _copyAssetFile(String assetPath, String targetPath) async {
+    try {
+      final byteData = await rootBundle.load(assetPath);
+      final file = File(targetPath);
+      await file.create(recursive: true);
+      await file.writeAsBytes(byteData.buffer.asUint8List(
+        byteData.offsetInBytes,
+        byteData.lengthInBytes,
+      ));
+    } catch (e) {
+      print('⚠️ Failed to copy asset: $assetPath → $e');
+    }
   }
 }
