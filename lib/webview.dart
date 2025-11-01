@@ -1,27 +1,31 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: library_private_types_in_public_api
 
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:virtualh5p/constants.dart';
 import 'package:virtualh5p/localserver.dart';
 import 'package:virtualh5p/tempdir.dart';
+import 'package:dio/dio.dart';
 
 class LocalWebView extends StatefulWidget {
+  const LocalWebView({super.key});
+
   @override
   _LocalWebViewState createState() => _LocalWebViewState();
 }
 
 class _LocalWebViewState extends State<LocalWebView> {
-  List<String> urls = [
-    'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Interactive%20Video.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9JbnRlcmFjdGl2ZSBWaWRlby5oNXAiLCJpYXQiOjE3NjE1MDM4NTksImV4cCI6MTc5MzAzOTg1OX0.qMAJYEY4IsrCjhQnFFlz2jA-H0OBJyJtXiwsj5nL35k',
-    'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Test%20mcq.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9UZXN0IG1jcS5oNXAiLCJpYXQiOjE3NjE0OTk1OTMsImV4cCI6MTc5MzAzNTU5M30.Fb4dOMKXjTB47Ht1ot7PLcsw6qHbDWJ5FSZL8Q5Meq8'
-  ]; //
+ 
 
-  final Completer<InAppWebViewController> _controller = Completer();
-  String? _localServerUrl;
-  double _loadingProgress = 0;
-  double _downloadProgress = 0;
+  final ValueNotifier<double> _downloadProgress = ValueNotifier(0);
+  final ValueNotifier<double> _loadingProgress = ValueNotifier(0);
+  final ValueNotifier<String?> _localServerUrl = ValueNotifier(null);
+
   final H5PSetup _h5pSetup = H5PSetup();
+  final Completer<InAppWebViewController> _controller = Completer();
+
   @override
   void initState() {
     super.initState();
@@ -33,22 +37,34 @@ class _LocalWebViewState extends State<LocalWebView> {
   }
 
   Future<void> _loadH5P(String url) async {
-    setState(() => _downloadProgress = 0);
-    await _h5pSetup.downloadAndExtract(url, onProgress: (p) {
-      setState(() => _downloadProgress = p);
-    });
+    _downloadProgress.value = 0;
 
-    final dir = await _h5pSetup.copyBaseFiles();
-    var server = await startLocalServer(dir);
+    try {
+      await _h5pSetup.downloadAndExtract(url, onProgress: (p) {
+        _downloadProgress.value = p;
+      });
 
-    setState(() {
-      _localServerUrl = "http://${server.address.address}:${server.port}";
-      _downloadProgress = 1.0;
-    });
+      final dir = await _h5pSetup.copyBaseFiles();
+      final server = await startLocalServer(dir);
+
+      _localServerUrl.value = "http://${server.address.address}:${server.port}";
+      _downloadProgress.value = 1.0;
+    } on DioException catch (e) {
+      String message = 'Network error: ${e.message}';
+      if (e.error is SocketException) {
+        message = 'No internet connection or host not found.';
+      }
+      _showSnackBar(message);
+    } catch (e) {
+      _showSnackBar('Error loading H5P: $e');
+    }
   }
 
-  void _setupJavaScriptChannels(InAppWebViewController controller) {
-    // Add JavaScript Channels if needed
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   void _injectJavaScriptLogging(InAppWebViewController controller) {
@@ -58,9 +74,7 @@ class _LocalWebViewState extends State<LocalWebView> {
   }
 
   void _showBlockingSnackbar(String host) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Access to $host is blocked")),
-    );
+    _showSnackBar("Access to $host is blocked");
   }
 
   @override
@@ -81,31 +95,51 @@ class _LocalWebViewState extends State<LocalWebView> {
               );
             }).toList(),
           ),
-          if (_downloadProgress > 0 && _downloadProgress < 1)
-            LinearProgressIndicator(
-              value: _downloadProgress,
-              color: Colors.orange,
-            ),
+
+          // Download progress bar
+          ValueListenableBuilder<double>(
+            valueListenable: _downloadProgress,
+            builder: (_, value, __) {
+              if (value > 0 && value < 1) {
+                return LinearProgressIndicator(value: value, color: Colors.orange);
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+
+          // WebView + loading overlay
           Expanded(
-            child: _localServerUrl == null
-                ? const Center(child: Text("Select a file to load"))
-                : Stack(
-                    children: [
-                      inappwebView(),
-                      if (_loadingProgress < 1 && _localServerUrl != null)
-                        LinearProgressIndicator(value: _loadingProgress),
-                    ],
-                  ),
+            child: ValueListenableBuilder<String?>(
+              valueListenable: _localServerUrl,
+              builder: (context, url, _) {
+                if (url == null) {
+                  return const Center(child: Text("Select a file to load"));
+                }
+                return Stack(
+                  children: [
+                    inappwebView(url),
+                    ValueListenableBuilder<double>(
+                      valueListenable: _loadingProgress,
+                      builder: (_, p, __) {
+                        if (p < 1) return LinearProgressIndicator(value: p);
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  inappwebView() {
+
+  inappwebView(String url) {
     return InAppWebView(
-      key: ValueKey(_localServerUrl),
-      initialUrlRequest: URLRequest(url: WebUri(_localServerUrl!)),
+     key: ValueKey(url),
+      initialUrlRequest: URLRequest(url: WebUri(url)),
       initialSettings: InAppWebViewSettings(
         javaScriptEnabled: true,
         allowContentAccess: true,
@@ -117,17 +151,17 @@ class _LocalWebViewState extends State<LocalWebView> {
       ),
       onWebViewCreated: (controller) {
         _controller.complete(controller);
-        _setupJavaScriptChannels(controller);
+      //  _setupJavaScriptChannels(controller);
       },
       onLoadStart: (controller, url) {
-        setState(() => _loadingProgress = 0);
+       _loadingProgress.value = 0;
       },
       onProgressChanged: (controller, progress) {
-        setState(() => _loadingProgress = progress / 100);
+        _loadingProgress.value = progress / 100;
       },
       onLoadStop: (controller, url) {
         _injectJavaScriptLogging(controller);
-        setState(() => _loadingProgress = 1);
+        _loadingProgress.value = 1;
       },
       onConsoleMessage: (controller, consoleMessage) {
         debugPrint("Console: Error ${consoleMessage.message}");
