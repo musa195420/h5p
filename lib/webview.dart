@@ -1,12 +1,16 @@
+// local_webview.dart
+
 // ignore_for_file: library_private_types_in_public_api
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:virtualh5p/constants.dart';
+import 'package:virtualh5p/inappwebview.dart';
 import 'package:virtualh5p/localserver.dart';
 import 'package:virtualh5p/tempdir.dart';
-import 'package:dio/dio.dart';
+import 'package:virtualh5p/config.dart';
 
 class LocalWebView extends StatefulWidget {
   const LocalWebView({super.key});
@@ -17,9 +21,10 @@ class LocalWebView extends StatefulWidget {
 
 class _LocalWebViewState extends State<LocalWebView> {
   final ValueNotifier<double> _downloadProgress = ValueNotifier(0);
-  final ValueNotifier<double> _loadingProgress = ValueNotifier(0);
   final ValueNotifier<String?> _localServerUrl = ValueNotifier(null);
   final ValueNotifier<bool> _isLoading = ValueNotifier(false);
+  final ValueNotifier<H5PLoadStatus> _status =
+      ValueNotifier<H5PLoadStatus>(H5PLoadStatus.idle);
 
   final H5PSetup _h5pSetup = H5PSetup();
   InAppWebViewController? _webViewController;
@@ -50,47 +55,44 @@ class _LocalWebViewState extends State<LocalWebView> {
   }
 
   Future<void> _loadH5P(String url) async {
-    if (_isLoading.value) return; // Prevent multiple simultaneous loads
-    
+    if (_isLoading.value) return;
     _isLoading.value = true;
+    _status.value = H5PLoadStatus.downloading;
     _downloadProgress.value = 0;
-    _loadingProgress.value = 0;
 
     try {
-      // Close previous server
       await _closeServer();
 
       debugPrint("⬇️ Downloading H5P from $url ...");
-      await _h5pSetup.downloadAndExtract(url, onProgress: (p) {
-        _downloadProgress.value = p;
-      });
+      await _h5pSetup.downloadAndExtract(
+        url,
+        onProgress: (p) {
+          _downloadProgress.value = p;
+        },
+      );
 
+      _status.value = H5PLoadStatus.extracting;
       final dir = await _h5pSetup.copyBaseFiles();
+
       final server = await startLocalServer(dir);
       _currentServer = server;
+      _status.value = H5PLoadStatus.ready;
 
-      final newUrl = "http://${server.address.address}:${server.port}";
-      debugPrint("🌐 Local server running at: $newUrl");
-
-      // Update URL and reset WebView
+      // final newUrl = "http://${server.address.address}:${server.port}";
+      // debugPrint("🌐 Local server running at: $newUrl");
+final newUrl = "http://${server.address.address}:${server.port}?t=${DateTime.now().millisecondsSinceEpoch}";
+_localServerUrl.value = newUrl;
       _localServerUrl.value = newUrl;
       _downloadProgress.value = 1.0;
-
-      // Force WebView reload with new URL
-      if (_webViewController != null) {
-        debugPrint("🔄 Loading new URL in WebView: $newUrl");
-        await _webViewController!.loadUrl(
-          urlRequest: URLRequest(url: WebUri(newUrl)),
-        );
-      }
-
     } on DioException catch (e) {
+      _status.value = H5PLoadStatus.error;
       String message = 'Network error: ${e.message}';
       if (e.error is SocketException) {
         message = 'No internet connection or host not found.';
       }
       _showSnackBar(message);
     } catch (e) {
+      _status.value = H5PLoadStatus.error;
       _showSnackBar('Error loading H5P: $e');
     } finally {
       _isLoading.value = false;
@@ -100,22 +102,9 @@ class _LocalWebViewState extends State<LocalWebView> {
   void _showSnackBar(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 4),
-        ),
+        SnackBar(content: Text(message), duration: const Duration(seconds: 4)),
       );
     }
-  }
-
-  void _injectJavaScriptLogging(InAppWebViewController controller) {
-    controller.evaluateJavascript(
-      source: "console.log('JavaScript Logging Enabled');",
-    );
-  }
-
-  void _showBlockingSnackbar(String host) {
-    _showSnackBar("Access to $host is blocked");
   }
 
   @override
@@ -127,7 +116,6 @@ class _LocalWebViewState extends State<LocalWebView> {
       ),
       body: Column(
         children: [
-          // URL selector buttons with loading state
           Container(
             padding: const EdgeInsets.all(12),
             color: Colors.grey[50],
@@ -154,7 +142,50 @@ class _LocalWebViewState extends State<LocalWebView> {
             ),
           ),
 
-          // Download progress bar
+          // Status Indicator
+          ValueListenableBuilder<H5PLoadStatus>(
+            valueListenable: _status,
+            builder: (_, status, __) {
+              Color color;
+              IconData icon;
+              switch (status) {
+                case H5PLoadStatus.downloading:
+                  color = Colors.orange;
+                  icon = Icons.download;
+                  break;
+                case H5PLoadStatus.extracting:
+                  color = Colors.amber;
+                  icon = Icons.folder_open;
+                  break;
+                case H5PLoadStatus.ready:
+                  color = Colors.green;
+                  icon = Icons.check_circle;
+                  break;
+                case H5PLoadStatus.error:
+                  color = Colors.red;
+                  icon = Icons.error;
+                  break;
+                default:
+                  color = Colors.grey;
+                  icon = Icons.hourglass_empty;
+              }
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: 40,
+                color: color.withOpacity(0.1),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: color),
+                    const SizedBox(width: 8),
+                    Text(status.H5PLABEL, style: TextStyle(color: color)),
+                  ],
+                ),
+              );
+            },
+          ),
+
+          // Download Progress Bar
           ValueListenableBuilder<double>(
             valueListenable: _downloadProgress,
             builder: (_, value, __) {
@@ -162,41 +193,15 @@ class _LocalWebViewState extends State<LocalWebView> {
                 return LinearProgressIndicator(
                   value: value,
                   backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(Colors.orange),
                 );
               }
               return const SizedBox.shrink();
             },
           ),
 
-          // Status indicator
-          ValueListenableBuilder<bool>(
-            valueListenable: _isLoading,
-            builder: (_, isLoading, __) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: isLoading ? 40 : 0,
-                child: isLoading
-                    ? const Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            SizedBox(width: 10),
-                            Text('Loading H5P content...'),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              );
-            },
-          ),
-
-          // WebView + loading overlay
+          // WebView
           Expanded(
             child: ValueListenableBuilder<String?>(
               valueListenable: _localServerUrl,
@@ -216,80 +221,20 @@ class _LocalWebViewState extends State<LocalWebView> {
                     ),
                   );
                 }
-                return Stack(
-                  children: [
-                    _buildWebView(url),
-                    ValueListenableBuilder<double>(
-                      valueListenable: _loadingProgress,
-                      builder: (_, p, __) {
-                        if (p < 1) {
-                          return LinearProgressIndicator(
-                            value: p,
-                            backgroundColor: Colors.transparent,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ],
+                return LocalH5PWebView(
+                  url: url,
+                  onWebViewCreated: (controller) {
+                    _webViewController = controller;
+                  },
+                  onPageLoaded: () {
+                    debugPrint("✅ H5P fully loaded in webview");
+                  },
                 );
               },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildWebView(String url) {
-    return InAppWebView(
-      key: ValueKey(url), // This ensures WebView recreates when URL changes
-      initialUrlRequest: URLRequest(url: WebUri(url)),
-      initialSettings: InAppWebViewSettings(
-        javaScriptEnabled: true,
-        allowContentAccess: true,
-        allowFileAccess: true,
-        domStorageEnabled: true,
-        iframeCsp: "",
-        mixedContentMode: MixedContentMode.fromNativeValue(1),
-        useShouldInterceptRequest: true,
-        transparentBackground: true,
-      ),
-      onWebViewCreated: (controller) {
-        _webViewController = controller;
-        debugPrint("🎯 WebView created for URL: $url");
-      },
-      onLoadStart: (controller, url) {
-        debugPrint("🚀 Loading started: $url");
-        _loadingProgress.value = 0;
-      },
-      onProgressChanged: (controller, progress) {
-        _loadingProgress.value = progress / 100;
-        if (progress == 100) {
-          debugPrint("✅ Page fully loaded");
-        }
-      },
-      onLoadStop: (controller, url) {
-        _injectJavaScriptLogging(controller);
-        _loadingProgress.value = 1;
-        debugPrint("🏁 Load completed: $url");
-      },
-      onConsoleMessage: (controller, consoleMessage) {
-        debugPrint("Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}");
-      },
-      onLoadHttpError: (controller, url, statusCode, description) {
-        debugPrint("❌ HTTP Error $statusCode: $description for $url");
-        _showSnackBar("Failed to load content: $description");
-      },
-      shouldOverrideUrlLoading: (controller, navigationAction) async {
-        final host = navigationAction.request.url?.host;
-        if (host?.contains('youtube.com') == true) {
-          _showBlockingSnackbar(host!);
-          return NavigationActionPolicy.CANCEL;
-        }
-        return NavigationActionPolicy.ALLOW;
-      },
     );
   }
 }
