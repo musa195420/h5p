@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:virtualh5p/example/webview.dart';
+import 'package:virtualh5p/example/test_view.dart';
 
 void main() {
   runApp(const MyApp());

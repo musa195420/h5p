@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:virtualh5p/config.dart';
 
 HttpServer? _activeServer; // keep a global reference
 
@@ -30,7 +31,7 @@ Future<HttpServer> startLocalServer(String directory) async {
     final server = await shelf_io.serve(
       handler,
       InternetAddress.loopbackIPv4,
-      8030,
+      h5pPort,
       shared: true, // allow multiple bindings safely
     );
 
@@ -44,7 +45,6 @@ Future<HttpServer> startLocalServer(String directory) async {
   }
 }
 
-/// Optionally, stop the server manually when needed
 Future<void> stopLocalServer() async {
   if (_activeServer != null) {
     debugPrint('🛑 Stopping local server...');

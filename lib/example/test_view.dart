@@ -1,108 +1,30 @@
-// local_webview.dart
 
-// ignore_for_file: library_private_types_in_public_api
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:virtualh5p/constants.dart';
+import 'package:virtualh5p/h5p_loader.dart';
 import 'package:virtualh5p/local_web_view.dart';
-import 'package:virtualh5p/local_server.dart';
-import 'package:virtualh5p/tempdir.dart';
 import 'package:virtualh5p/config.dart';
 
 class LocalWebView extends StatefulWidget {
   const LocalWebView({super.key});
 
   @override
-  _LocalWebViewState createState() => _LocalWebViewState();
+  LocalWebViewState createState() => LocalWebViewState();
 }
 
-class _LocalWebViewState extends State<LocalWebView> {
-  final ValueNotifier<double> _downloadProgress = ValueNotifier(0);
-  final ValueNotifier<String?> _localServerUrl = ValueNotifier(null);
-  final ValueNotifier<bool> _isLoading = ValueNotifier(false);
-  final ValueNotifier<H5PLoadStatus> _status =
-      ValueNotifier<H5PLoadStatus>(H5PLoadStatus.idle);
-
-  final H5PSetup _h5pSetup = H5PSetup();
-  HttpServer? _currentServer;
+class LocalWebViewState extends State<LocalWebView> {
+  final H5PLoader _loader = H5PLoader();
 
   @override
   void initState() {
     super.initState();
-    _prepareBaseFiles();
+    _loader.prepareBaseFiles();
   }
 
   @override
   void dispose() {
-    _closeServer();
+    _loader.closeServer();
     super.dispose();
-  }
-
-  Future<void> _closeServer() async {
-    if (_currentServer != null) {
-      await _currentServer!.close(force: true);
-      _currentServer = null;
-      debugPrint("🧹 Server closed");
-    }
-  }
-
-  Future<void> _prepareBaseFiles() async {
-    await _h5pSetup.copyBaseFiles();
-  }
-
-  Future<void> _loadH5P(String url) async {
-    if (_isLoading.value) return;
-    _isLoading.value = true;
-    _status.value = H5PLoadStatus.downloading;
-    _downloadProgress.value = 0;
-
-    try {
-      await _closeServer();
-
-      debugPrint("⬇️ Downloading H5P from $url ...");
-      await _h5pSetup.downloadAndExtract(
-        url,
-        onProgress: (p) {
-          _downloadProgress.value = p;
-        },
-      );
-
-      _status.value = H5PLoadStatus.extracting;
-      final dir = await _h5pSetup.copyBaseFiles();
-
-      final server = await startLocalServer(dir);
-      _currentServer = server;
-      _status.value = H5PLoadStatus.ready;
-
-      // final newUrl = "http://${server.address.address}:${server.port}";
-      // debugPrint("🌐 Local server running at: $newUrl");
-final newUrl = "http://${server.address.address}:${server.port}?t=${DateTime.now().millisecondsSinceEpoch}";
-_localServerUrl.value = newUrl;
-      _localServerUrl.value = newUrl;
-      _downloadProgress.value = 1.0;
-    } on DioException catch (e) {
-      _status.value = H5PLoadStatus.error;
-      String message = 'Network error: ${e.message}';
-      if (e.error is SocketException) {
-        message = 'No internet connection or host not found.';
-      }
-      _showSnackBar(message);
-    } catch (e) {
-      _status.value = H5PLoadStatus.error;
-      _showSnackBar('Error loading H5P: $e');
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), duration: const Duration(seconds: 4)),
-      );
-    }
   }
 
   @override
@@ -124,10 +46,10 @@ _localServerUrl.value = newUrl;
                 final index = entry.key;
                 final url = entry.value;
                 return ValueListenableBuilder<bool>(
-                  valueListenable: _isLoading,
+                  valueListenable: _loader.isLoading,
                   builder: (_, isLoading, __) {
                     return ElevatedButton(
-                      onPressed: isLoading ? null : () => _loadH5P(url),
+                      onPressed: isLoading ? null : () => _loader.loadH5P(url),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[600],
                         foregroundColor: Colors.white,
@@ -142,7 +64,7 @@ _localServerUrl.value = newUrl;
 
           // Status Indicator
           ValueListenableBuilder<H5PLoadStatus>(
-            valueListenable: _status,
+            valueListenable: _loader.status,
             builder: (_, status, __) {
               Color color;
               IconData icon;
@@ -170,7 +92,7 @@ _localServerUrl.value = newUrl;
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 40,
-                color: color.withOpacity(0.1),
+                color: color.withAlpha(1),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -185,7 +107,7 @@ _localServerUrl.value = newUrl;
 
           // Download Progress Bar
           ValueListenableBuilder<double>(
-            valueListenable: _downloadProgress,
+            valueListenable: _loader.downloadProgress,
             builder: (_, value, __) {
               if (value > 0 && value < 1) {
                 return LinearProgressIndicator(
@@ -202,7 +124,7 @@ _localServerUrl.value = newUrl;
           // WebView
           Expanded(
             child: ValueListenableBuilder<String?>(
-              valueListenable: _localServerUrl,
+              valueListenable: _loader.localServerUrl,
               builder: (context, url, _) {
                 if (url == null) {
                   return const Center(
@@ -221,8 +143,7 @@ _localServerUrl.value = newUrl;
                 }
                 return LocalH5PWebView(
                   url: url,
-                  onWebViewCreated: (controller) {
-                  },
+                  onWebViewCreated: (controller) {},
                   onPageLoaded: () {
                     debugPrint("✅ H5P fully loaded in webview");
                   },

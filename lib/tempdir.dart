@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -28,7 +29,7 @@ class H5PSetup {
           'assets/web/$fileName', '${finalDir.path}/$fileName');
     }
 
-    print('✅ Base files copied to: ${finalDir.path}');
+    debugPrint('✅ Base files copied to: ${finalDir.path}');
     return finalDir.path;
   }
 
@@ -41,7 +42,7 @@ class H5PSetup {
     final extractPath = '${dir.path}/base/final';
 
     // Download .h5p file with progress callback
-    print('⬇️ Downloading H5P from $url ...');
+    debugPrint('⬇️ Downloading H5P from $url ...');
     await _dio.download(url, tempH5p.path,
         onReceiveProgress: (received, total) {
       if (total != -1 && onProgress != null) {
@@ -54,7 +55,7 @@ class H5PSetup {
     await tempH5p.rename(tempZip.path);
 
     // Extract
-    print('📦 Extracting H5P ...');
+    debugPrint('📦 Extracting H5P ...');
     final bytes = await tempZip.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
 
@@ -68,7 +69,7 @@ class H5PSetup {
       }
     }
 
-    print('✅ Extraction done → $extractPath');
+    debugPrint('✅ Extraction done → $extractPath');
   }
 
   Future<void> _copyAssetFile(String assetPath, String targetPath) async {
@@ -81,7 +82,7 @@ class H5PSetup {
         byteData.lengthInBytes,
       ));
     } catch (e) {
-      print('⚠️ Failed to copy asset: $assetPath → $e');
+      debugPrint('⚠️ Failed to copy asset: $assetPath → $e');
     }
   }
 }
