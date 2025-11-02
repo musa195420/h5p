@@ -5,10 +5,9 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:virtualh5p/constants.dart';
-import 'package:virtualh5p/inappwebview.dart';
-import 'package:virtualh5p/localserver.dart';
+import 'package:virtualh5p/local_web_view.dart';
+import 'package:virtualh5p/local_server.dart';
 import 'package:virtualh5p/tempdir.dart';
 import 'package:virtualh5p/config.dart';
 
@@ -27,7 +26,6 @@ class _LocalWebViewState extends State<LocalWebView> {
       ValueNotifier<H5PLoadStatus>(H5PLoadStatus.idle);
 
   final H5PSetup _h5pSetup = H5PSetup();
-  InAppWebViewController? _webViewController;
   HttpServer? _currentServer;
 
   @override
@@ -224,7 +222,6 @@ _localServerUrl.value = newUrl;
                 return LocalH5PWebView(
                   url: url,
                   onWebViewCreated: (controller) {
-                    _webViewController = controller;
                   },
                   onPageLoaded: () {
                     debugPrint("✅ H5P fully loaded in webview");

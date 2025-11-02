@@ -70,6 +70,7 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
           },
           onLoadStop: (controller, url) {
             debugPrint("🏁 Load completed: $url");
+             _injectJavaScriptLogging(controller);
           },
           onConsoleMessage: (controller, consoleMessage) {
             debugPrint("Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}");
