@@ -1,5 +1,7 @@
 // config.dart
 
+// ignore_for_file: non_constant_identifier_names
+
 enum H5PLoadStatus {
   idle,
   downloading,
