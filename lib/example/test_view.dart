@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:virtualh5p/constants.dart';
+import 'package:virtualh5p/example/constants.dart';
 import 'package:virtualh5p/h5p_loader.dart';
 import 'package:virtualh5p/local_web_view.dart';
 import 'package:virtualh5p/config.dart';
