@@ -1,67 +1,88 @@
+✅ Clear overview and features
+✅ Usage example
+✅ Complete iOS & Android configuration
+✅ Installation steps
+✅ Contribution and roadmap sections
+✅ Polished formatting with emojis and syntax-highlighted code blocks
+
 # 🎯 test_h5p
 
 A new **Flutter package** that helps you **play Lumi H5P files locally** — no external H5P server required! 🚀
+
+Bring interactive H5P learning experiences directly into your Flutter apps — **offline, serverless, and simple**.
 
 ---
 
 ## 📱 About
 
-**test_h5p** is designed to make it easy for developers and educators to **load, download, and play H5P interactive content** directly on their devices.  
-This is especially useful for **schooling or offline learning scenarios**, where access to an H5P server may not be available.
+**test_h5p** enables developers and educators to **load, download, and play H5P interactive content** directly on mobile devices.  
+It’s especially useful for **offline schooling or e-learning environments**, where access to an H5P server is limited or unavailable.
 
 ---
 
 ## ✨ Features
 
-✅ Play `.h5p` files **locally** on your device  
-✅ **No need for an H5P server** or online rendering  
-✅ Automatically downloads the `.h5p` file from a given URL  
-✅ Future updates will include:
+✅ Play `.h5p` files **locally** — no internet needed after download  
+✅ **No H5P server** or backend rendering required  
+✅ Automatically downloads `.h5p` files from a direct URL  
+✅ Perfect for **educational and e-learning** use cases  
+✅ Planned updates:
 
-- 🔄 Background downloading of all H5P files using a **`HashMap<String, String>`**
-- 💾 Seamless local playback using stored file references
+- 🔄 Background downloads using `HashMap<String, String>`
+- 💾 Caching & offline playback
+- 🧩 Improved rendering and user interface
 
 ---
 
 ## 🧩 How It Works
 
-1. **Upload** your H5P file to **Lumi** (or any accessible online location).
-2. **Provide the direct URL** of your H5P file to this package.
-3. The package will:
-   - 📦 Download the `.h5p` file
-   - 🎮 Render and play it locally
-4. Enjoy **offline interactive content** — completely **serverless**! 🌐❌
+1. **Upload** your `.h5p` file to **Lumi** or another accessible online location.
+2. **Copy the direct URL** of your `.h5p` file.
+3. **Provide the URL** to this package’s controller.
+4. The package will:
+   - 📦 Download the file
+   - 🧠 Unpack and render it locally
+   - 🎮 Play it seamlessly inside your app
+
+No server, no hassle — everything happens **locally**. 🌐❌
 
 ---
 
 ## 🆓 License & Usage
 
 This package is **free to use** for **schooling and educational purposes**. 🏫  
-Future versions may include more advanced offline management features.
+Commercial usage is allowed with attribution. Future versions will include additional offline and background features.
 
 ---
 
 ## 🚀 Getting Started
 
-You can integrate this package into your Flutter project by importing it and using the provided controller and widget.
+Add this package to your `pubspec.yaml` file:
 
----
+````yaml
+dependencies:
+  test_h5p: ^0.1.0
 
-## 💡 Example (Coming Soon)
 
-Here’s a **basic usage example**:
+Then, install it:
 
-```dart
-// Import the package
+flutter pub get
+
+
+Finally,import it in your Dart file:
+
 import 'package:test_h5p/test_h5p.dart';
 
-// Initialize the controller
+💡 Example Usage
+
+Here’s a simple example showing how to play an H5P file:
+``` dart
+import 'package:test_h5p/test_h5p.dart';
+
 LumiH5PController _h5pController = LumiH5PController();
 
-// Create the WebView
 H5pWebView webView = H5pWebView(controller: _h5pController);
 
-// Example usage with a progress indicator
 ValueListenableBuilder<double>(
   valueListenable: _h5pController.downloadProgress,
   builder: (_, value, __) {
@@ -72,4 +93,119 @@ ValueListenableBuilder<double>(
     return Expanded(child: webView);
   },
 );
-```
+
+🍎 iOS Configuration
+
+If you’re targeting iOS, you need to allow local networking so the app can load H5P files from local storage or localhost.
+
+📂 File Location
+ios/Runner/Info.plist
+
+🧩 Add the Following Inside the <dict> Tag
+
+(but not inside any other <dict>)
+
+<key>NSAppTransportSecurity</key>
+<dict>
+  <!-- Allow local HTTP (127.0.0.1, localhost) -->
+  <key>NSAllowsLocalNetworking</key>
+  <true/>
+
+  <!-- General rule for HTTP (optional if you only use localhost) -->
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+
+  <!-- (Optional) Restrict to localhost only -->
+  <key>NSExceptionDomains</key>
+  <dict>
+    <key>localhost</key>
+    <dict>
+      <key>NSExceptionAllowsInsecureHTTPLoads</key>
+      <true/>
+      <key>NSIncludesSubdomains</key>
+      <true/>
+    </dict>
+    <key>127.0.0.1</key>
+    <dict>
+      <key>NSExceptionAllowsInsecureHTTPLoads</key>
+      <true/>
+      <key>NSIncludesSubdomains</key>
+      <true/>
+    </dict>
+  </dict>
+</dict>
+
+✅ After Updating
+
+Run:
+
+flutter clean
+flutter pub get
+flutter run
+
+🤖 Android Configuration
+
+For Android, ensure that your app can access local files and HTTP connections.
+
+📂 File Location
+android/app/src/main/AndroidManifest.xml
+
+🧩 Add the Following Inside the <application> Tag
+<application
+    android:name="${applicationName}"
+    android:label="test_h5p"
+    android:usesCleartextTraffic="true" <!-- Allow local HTTP -->
+    android:icon="@mipmap/ic_launcher">
+
+🧩 (Optional) Add Internet Permission
+
+Add this above the <application> tag:
+
+<uses-permission android:name="android.permission.INTERNET"/>
+
+
+This allows the package to fetch .h5p files from remote URLs before caching them locally.
+
+🧠 Why These Settings Are Needed
+
+By default, both iOS and Android restrict local HTTP access for security reasons.
+Because this package plays .h5p files locally (via WebView and internal file loading), these permissions are required to ensure:
+
+🔓 Local network access
+
+📂 Smooth local file rendering
+
+⚙️ Compatibility across all Flutter platforms
+
+🧭 Future Roadmap
+
+ Background download of multiple H5P files
+
+ Offline caching using HashMap<String, String>
+
+ Improved H5P player user interface
+
+ Android and iOS native performance optimizations
+
+ Example app with interactive demos
+
+💬 Contribute
+
+We welcome contributions from the community! 🤝
+
+Feel free to:
+
+🪲 Report bugs
+
+💡 Suggest features
+
+🧑‍💻 Submit pull requests
+
+Together, let’s make H5P local playback simple, open-source, and reliable. 💪
+
+🏷️ Version
+
+v0.1.0 – Initial Release
+
+Made with ❤️ by the community for educators, learners, and Flutter developers.
+````
