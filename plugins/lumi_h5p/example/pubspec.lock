@@ -259,7 +259,7 @@ packages:
   lumi_h5p:
     dependency: "direct main"
     description:
-      path: "plugins/lumi_h5p"
+      path: ".."
       relative: true
     source: path
     version: "1.0.1"

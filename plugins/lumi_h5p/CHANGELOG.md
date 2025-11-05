@@ -4,35 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [1.0.0+2] - 2025-11-05
+## [1.0.2] - 2025-11-05
 
 ### 🚀 Added
 
-- Introduced **`LumiH5PController`** for improved lifecycle management of H5P content.
-- Added **download progress tracking** using `ValueListenableBuilder<double>` for real-time UI updates.
-- Added **H5P content loading control** — easily start, stop, or reload H5P packages from URLs or local paths.
-- Added **helper utilities** for preloading assets and managing cache.
+- Introduced **`LumiH5PController`** for managing the full H5P content lifecycle (loading, refreshing, reusing).
+- Added **download progress tracking** with `ValueListenableBuilder<double>` to reflect live download status in the UI.
+- Added **H5P loading control methods** — easily start, stop, or reload content from both URLs and local paths.
+- Added **helper utilities** for handling asset extraction, caching, and setup for local web serving.
 
 ### 🧩 Improved
 
-- Enhanced **download reliability** and UI responsiveness during asset fetching.
-- Optimized **asset copying** process from bundled resources to temporary directories.
-- Improved **local web server handling** for H5P content serving.
-- Enhanced **error handling and debug logging** for failed downloads or missing assets.
+- Enhanced **download reliability** for large H5P packages.
+- Optimized **asset copying** from the Flutter bundle to the temporary directory.
+- Improved **local web server performance** and content availability.
+- Added **comprehensive error logs** and safe null checks to prevent crashes.
 
 ### 🧰 Internal
 
-- Code refactoring for better maintainability and separation of logic.
-- Improved null safety and controller checks before content rendering.
-- Updated documentation and README examples.
-
----
-
-## [1.0.0] - 2025-11-01
-
-### 🎉 Initial Release
-
-- Basic support for loading and displaying **H5P interactive content** locally.
-- Local server setup to serve unzipped H5P files.
-- Support for both **local assets** and **downloaded packages**.
-- Example app included demonstrating simple content playback.
+- Major code refactoring for cleaner architecture and maintainability.
+- Updated documentation and README with clearer examples.
