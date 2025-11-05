@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
-
-import '../config.dart';
+import '../h5p_helper.dart';
 import '../h5p_loader.dart';
 import '../local_web_view.dart';
-import 'constants.dart';
+import '../config.dart';
 
 class LocalWebView extends StatefulWidget {
-  const LocalWebView({super.key});
+  /// Either provide a list of URLs...
+  final List<String>? urls;
+
+  /// ...or a map of name -> URL.
+  final Map<String, String>? urlMap;
+
+  const LocalWebView({
+    super.key,
+    this.urls,
+    this.urlMap,
+  });
 
   @override
   LocalWebViewState createState() => LocalWebViewState();
@@ -29,6 +38,9 @@ class LocalWebViewState extends State<LocalWebView> {
 
   @override
   Widget build(BuildContext context) {
+    // Normalize URLs into a map for display convenience
+    final Map<String, String> urlEntries =
+        H5PUrlHelper.normalize(urls: widget.urls, urlMap: widget.urlMap);
     return Scaffold(
       appBar: AppBar(
         title: const Text("H5P Local Viewer"),
@@ -36,14 +48,15 @@ class LocalWebViewState extends State<LocalWebView> {
       ),
       body: Column(
         children: [
+          // Buttons
           Container(
             padding: const EdgeInsets.all(12),
             color: Colors.grey[50],
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: urls.asMap().entries.map((entry) {
-                final index = entry.key;
+              children: urlEntries.entries.map((entry) {
+                final label = entry.key;
                 final url = entry.value;
                 return ValueListenableBuilder<bool>(
                   valueListenable: _loader.isLoading,
@@ -54,7 +67,7 @@ class LocalWebViewState extends State<LocalWebView> {
                         backgroundColor: Colors.blue[600],
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('Load H5P ${index + 1}'),
+                      child: Text(label),
                     );
                   },
                 );
@@ -62,7 +75,7 @@ class LocalWebViewState extends State<LocalWebView> {
             ),
           ),
 
-          // Status Indicator
+          // Status indicator
           ValueListenableBuilder<H5PLoadStatus>(
             valueListenable: _loader.status,
             builder: (_, status, __) {
@@ -92,7 +105,7 @@ class LocalWebViewState extends State<LocalWebView> {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 40,
-                color: color.withAlpha(1),
+                color: color.withAlpha(30),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -105,7 +118,7 @@ class LocalWebViewState extends State<LocalWebView> {
             },
           ),
 
-          // Download Progress Bar
+          // Progress bar
           ValueListenableBuilder<double>(
             valueListenable: _loader.downloadProgress,
             builder: (_, value, __) {
@@ -143,10 +156,8 @@ class LocalWebViewState extends State<LocalWebView> {
                 }
                 return LocalH5PWebView(
                   url: url,
-                  onWebViewCreated: (controller) {},
-                  onPageLoaded: () {
-                    debugPrint("✅ H5P fully loaded in webview");
-                  },
+                  onWebViewCreated: (_) {},
+                  onPageLoaded: () => debugPrint("✅ H5P fully loaded"),
                 );
               },
             ),
