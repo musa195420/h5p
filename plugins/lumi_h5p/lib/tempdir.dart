@@ -74,7 +74,10 @@ class H5PSetup {
 
   Future<void> _copyAssetFile(String assetPath, String targetPath) async {
     try {
-      final byteData = await rootBundle.load(assetPath);
+      // Ensure plugin asset prefix
+      final pluginAssetPath = 'packages/lumi_h5p/$assetPath';
+
+      final byteData = await rootBundle.load(pluginAssetPath);
       final file = File(targetPath);
       await file.create(recursive: true);
       await file.writeAsBytes(byteData.buffer.asUint8List(

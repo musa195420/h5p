@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "h5p",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "h5p (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "h5p (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "lumi_h5p",
+            "cwd": "plugins\\lumi_h5p",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "lumi_h5p (profile mode)",
+            "cwd": "plugins\\lumi_h5p",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "lumi_h5p (release mode)",
+            "cwd": "plugins\\lumi_h5p",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
