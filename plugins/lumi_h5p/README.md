@@ -59,24 +59,26 @@ Commercial usage is allowed with attribution. Future versions will include addit
 
 Add this package to your `pubspec.yaml` file:
 
-````yaml
+## Yaml
+
 dependencies:
-  test_h5p: ^0.1.0
+test_h5p: ^0.1.0
 
+**Then, install it:**
 
-Then, install it:
+**flutter pub get**
 
-flutter pub get
+_Finally, import it in your Dart file_
 
-
-Finally,import it in your Dart file:
-
-import 'package:test_h5p/test_h5p.dart';
+**import 'package:test_h5p/test_h5p.dart';**
 
 💡 Example Usage
 
 Here’s a simple example showing how to play an H5P file:
-``` dart
+
+## Dart
+
+```dart
 import 'package:test_h5p/test_h5p.dart';
 
 LumiH5PController _h5pController = LumiH5PController();
@@ -93,8 +95,9 @@ ValueListenableBuilder<double>(
     return Expanded(child: webView);
   },
 );
+```
 
-🍎 iOS Configuration
+# 🍎 iOS Configuration
 
 If you’re targeting iOS, you need to allow local networking so the app can load H5P files from local storage or localhost.
 
@@ -105,6 +108,7 @@ ios/Runner/Info.plist
 
 (but not inside any other <dict>)
 
+```plist
 <key>NSAppTransportSecurity</key>
 <dict>
   <!-- Allow local HTTP (127.0.0.1, localhost) -->
@@ -134,8 +138,9 @@ ios/Runner/Info.plist
     </dict>
   </dict>
 </dict>
+```
 
-✅ After Updating
+##✅ After Updating
 
 Run:
 
@@ -143,30 +148,35 @@ flutter clean
 flutter pub get
 flutter run
 
-🤖 Android Configuration
+## 🤖 Android Configuration
 
-For Android, ensure that your app can access local files and HTTP connections.
+**For Android, ensure that your app can access local files and HTTP connections.**
 
-📂 File Location
-android/app/src/main/AndroidManifest.xml
+**📂 File Location**
+_android/app/src/main/AndroidManifest.xml_
 
-🧩 Add the Following Inside the <application> Tag
+## 🧩 Add the Following Inside the <application> Tag
+
+```xml
+
 <application
     android:name="${applicationName}"
     android:label="test_h5p"
     android:usesCleartextTraffic="true" <!-- Allow local HTTP -->
     android:icon="@mipmap/ic_launcher">
+```
 
 🧩 (Optional) Add Internet Permission
 
 Add this above the <application> tag:
 
+```
 <uses-permission android:name="android.permission.INTERNET"/>
+```
 
+**This allows the package to fetch .h5p files from remote URLs before caching them locally.**
 
-This allows the package to fetch .h5p files from remote URLs before caching them locally.
-
-🧠 Why These Settings Are Needed
+## 🧠 Why These Settings Are Needed
 
 By default, both iOS and Android restrict local HTTP access for security reasons.
 Because this package plays .h5p files locally (via WebView and internal file loading), these permissions are required to ensure:
@@ -179,15 +189,15 @@ Because this package plays .h5p files locally (via WebView and internal file loa
 
 🧭 Future Roadmap
 
- Background download of multiple H5P files
+Background download of multiple H5P files
 
- Offline caching using HashMap<String, String>
+Offline caching using HashMap<String, String>
 
- Improved H5P player user interface
+Improved H5P player user interface
 
- Android and iOS native performance optimizations
+Android and iOS native performance optimizations
 
- Example app with interactive demos
+Example app with interactive demos
 
 💬 Contribute
 
@@ -205,7 +215,10 @@ Together, let’s make H5P local playback simple, open-source, and reliable. �
 
 🏷️ Version
 
-v0.1.0 – Initial Release
+## v0.1.0 – Initial Release
 
 Made with ❤️ by the community for educators, learners, and Flutter developers.
-````
+
+```
+
+```

@@ -1,6 +1,6 @@
 name: lumi_h5p
 description: A Flutter plugin to view and serve H5P content locally using a static server and InAppWebView.
-version: 1.0.0
+version: 1.0.1
 homepage: https://muhammad-musa.netlify.app/
 repository: https://github.com/musa195420/h5p.git
 issue_tracker: https://github.com/musa195420/h5p/issues
