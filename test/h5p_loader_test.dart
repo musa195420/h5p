@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lumi_h5p/barrel.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:virtualh5p/config.dart';
-import 'package:virtualh5p/h5p_loader.dart';
-import 'package:virtualh5p/tempdir.dart';
 
 class MockH5PSetup extends Mock implements H5PSetup {}
 

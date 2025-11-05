@@ -1,5 +1,7 @@
 // local_webview_widget.dart
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -33,9 +35,9 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
             javaScriptEnabled: true,
             allowContentAccess: true,
             allowFileAccess: true,
-             cacheEnabled: false,
-  clearCache: true,
-  clearSessionCache: true,
+            cacheEnabled: false,
+            clearCache: true,
+            clearSessionCache: true,
             domStorageEnabled: true,
             iframeCsp: "",
             mixedContentMode: MixedContentMode.fromNativeValue(1),
@@ -49,18 +51,18 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
             debugPrint("🚀 Loading started: $url");
             setState(() => _progress = 0);
           },
-            onLoadHttpError: (controller, url, statusCode, description) {
-        debugPrint("❌ HTTP Error $statusCode: $description for $url");
-        _showSnackBar("Failed to load content: $description");
-      },
-      shouldOverrideUrlLoading: (controller, navigationAction) async {
-        final host = navigationAction.request.url?.host;
-        if (host?.contains('youtube.com') == true) {
-          _showBlockingSnackbar(host!);
-          return NavigationActionPolicy.CANCEL;
-        }
-        return NavigationActionPolicy.ALLOW;
-      },
+          onLoadHttpError: (controller, url, statusCode, description) {
+            debugPrint("❌ HTTP Error $statusCode: $description for $url");
+            _showSnackBar("Failed to load content: $description");
+          },
+          shouldOverrideUrlLoading: (controller, navigationAction) async {
+            final host = navigationAction.request.url?.host;
+            if (host?.contains('youtube.com') == true) {
+              _showBlockingSnackbar(host!);
+              return NavigationActionPolicy.CANCEL;
+            }
+            return NavigationActionPolicy.ALLOW;
+          },
           onProgressChanged: (controller, progress) {
             setState(() => _progress = progress / 100);
             if (progress == 100) {
@@ -70,10 +72,11 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
           },
           onLoadStop: (controller, url) {
             debugPrint("🏁 Load completed: $url");
-             _injectJavaScriptLogging(controller);
+            _injectJavaScriptLogging(controller);
           },
           onConsoleMessage: (controller, consoleMessage) {
-            debugPrint("Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}");
+            debugPrint(
+                "Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}");
           },
         ),
         if (_progress < 1)
@@ -86,7 +89,7 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
     );
   }
 
-   void _injectJavaScriptLogging(InAppWebViewController controller) {
+  void _injectJavaScriptLogging(InAppWebViewController controller) {
     controller.evaluateJavascript(
       source: "console.log('JavaScript Logging Enabled');",
     );
@@ -96,7 +99,7 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
     _showSnackBar("Access to $host is blocked");
   }
 
-    void _showSnackBar(String message) {
+  void _showSnackBar(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -106,5 +109,4 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
       );
     }
   }
-
 }

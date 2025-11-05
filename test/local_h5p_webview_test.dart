@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtualh5p/local_web_view.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:lumi_h5p/barrel.dart';
 
 void main() {
   testWidgets('LocalH5PWebView displays a progress bar until load completes',

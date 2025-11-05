@@ -1,4 +1,4 @@
-library virtualh5p;
+library;
 
 /// 🧠 Main entry point for the VirtualH5P package.
 ///
@@ -13,9 +13,10 @@ library virtualh5p;
 /// runApp(MaterialApp(home: h5p.widget()));
 /// ```
 import 'package:flutter/material.dart';
-import 'package:virtualh5p/h5p_loader.dart';
-import 'package:virtualh5p/local_web_view.dart';
-import 'package:virtualh5p/config.dart';
+
+import 'config.dart';
+import 'h5p_loader.dart';
+import 'local_web_view.dart';
 
 /// Main controller for initializing, loading, and displaying H5P content.
 class LumiH5P {

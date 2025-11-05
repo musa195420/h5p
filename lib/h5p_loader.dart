@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:virtualh5p/config.dart';
-import 'package:virtualh5p/local_server.dart';
-import 'package:virtualh5p/tempdir.dart';
+
+import 'config.dart';
+import 'local_server.dart';
+import 'tempdir.dart';
 
 class H5PLoader {
   /// Progress notifier (0 → 1)

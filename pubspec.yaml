@@ -1,4 +1,4 @@
-name: virtualh5p
+name: lumi_h5p
 description: A Flutter package to view and serve H5P content locally using a static server and InAppWebView.
 version: 1.0.0
 homepage: https://muhammad-musa.netlify.app/

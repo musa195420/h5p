@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:virtualh5p/example/test_view.dart';
+import 'package:lumi_h5p/example/test_view.dart';
 
 void main() {
   testWidgets('renders app bar and button list', (WidgetTester tester) async {

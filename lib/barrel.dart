@@ -1,4 +1,4 @@
-library lumih5p;
+library;
 
 export 'config.dart';
 export 'h5p_loader.dart';
