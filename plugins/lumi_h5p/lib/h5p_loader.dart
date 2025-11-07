@@ -36,6 +36,10 @@ class H5PLoader {
     }
   }
 
+  Future<String> downloadInbackground(String url, String refName) async {
+    return await _h5pSetup.downloadFileForLater(url, refName);
+  }
+
   Future<void> loadH5P(String url) async {
     if (isLoading.value) return;
     isLoading.value = true;

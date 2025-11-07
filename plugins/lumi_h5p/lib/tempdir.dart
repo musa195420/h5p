@@ -33,6 +33,26 @@ class H5PSetup {
     return finalDir.path;
   }
 
+  Future<String> downloadFileForLater(String url, String refName) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final downloadDir = Directory('${dir.path}/downloads');
+    if (!downloadDir.existsSync()) {
+      downloadDir.createSync(recursive: true);
+    }
+
+    final filePath = '${downloadDir.path}/$refName.h5p';
+    final file = File(filePath);
+
+    await _dio.download(url, file.path, onReceiveProgress: (received, total) {
+      if (total != -1) {
+        final progress = (received / total * 100).toStringAsFixed(0);
+        debugPrint("⬇️ $refName → $progress%");
+      }
+    });
+
+    return file.path;
+  }
+
   /// Downloads a `.h5p` file, renames it to `.zip`, extracts to `/final`.
   Future<void> downloadAndExtract(String url,
       {Function(double)? onProgress}) async {
