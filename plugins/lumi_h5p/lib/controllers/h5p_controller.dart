@@ -8,7 +8,7 @@ import 'package:lumi_h5p/local_web_view.dart';
 import '../models/h5p_request_model.dart';
 
 class LumiH5PController {
-  H5PLoader? _loader;
+  final H5PLoader _loader = H5PLoader();
   bool _isQueueRunning = false;
   final ValueNotifier<List<H5PRequestModel>> requests =
       ValueNotifier<List<H5PRequestModel>>([]);
@@ -18,21 +18,19 @@ class LumiH5PController {
   final ValueNotifier<double> downloadProgress = ValueNotifier(0.0);
   final ValueNotifier<String?> localServerUrl = ValueNotifier(null);
 
-  void _attachLoader(H5PLoader loader) {
-    _loader = loader;
-
+  void _attachLoader() {
     // link loader notifiers to controller ones
-    loader.isLoading.addListener(() {
-      isLoading.value = loader.isLoading.value;
+    _loader.isLoading.addListener(() {
+      isLoading.value = _loader.isLoading.value;
     });
-    loader.status.addListener(() {
-      status.value = loader.status.value;
+    _loader.status.addListener(() {
+      status.value = _loader.status.value;
     });
-    loader.downloadProgress.addListener(() {
-      downloadProgress.value = loader.downloadProgress.value;
+    _loader.downloadProgress.addListener(() {
+      downloadProgress.value = _loader.downloadProgress.value;
     });
-    loader.localServerUrl.addListener(() {
-      localServerUrl.value = loader.localServerUrl.value;
+    _loader.localServerUrl.addListener(() {
+      localServerUrl.value = _loader.localServerUrl.value;
     });
   }
 
@@ -61,7 +59,7 @@ class LumiH5PController {
 
       try {
         final localPath =
-            await _loader!.downloadInbackground(model.url, model.refName);
+            await _loader.downloadInbackground(model.url, model.refName);
 
         // Mark as downloaded and store local path
         currentList[nextIndex] = model.copyWith(
@@ -84,14 +82,8 @@ class LumiH5PController {
     debugPrint("🏁 H5P queue complete");
   }
 
-  bool get isReady => _loader != null;
-
   void loadH5P(String url) {
-    if (!isReady) {
-      debugPrint("⚠️ H5PController not ready yet.");
-      return;
-    }
-    _loader!.loadH5P(url);
+    _loader.loadH5P(url);
   }
 
   void showdownloadedfile(String refName) {
@@ -187,7 +179,7 @@ class _H5pWebViewState extends State<H5pWebView> {
   void initState() {
     super.initState();
     _loader = H5PLoader();
-    widget.controller._attachLoader(_loader);
+    widget.controller._attachLoader();
     _loader.prepareBaseFiles();
   }
 

@@ -1,3 +1,5 @@
+import 'package:lumi_h5p/models/h5p_request_model.dart';
+
 const Map<String, String> h5pUrls = {
   'h5purl1':
       'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Interactive%20Video.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9JbnRlcmFjdGl2ZSBWaWRlby5oNXAiLCJpYXQiOjE3NjE1MDM4NTksImV4cCI6MTc5MzAzOTg1OX0.qMAJYEY4IsrCjhQnFFlz2jA-H0OBJyJtXiwsj5nL35k',
@@ -10,3 +12,7 @@ const Map<String, String> h5pUrls = {
   'h5purl5':
       'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Example%20content%20-%20Arts%20of%20Europe.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9FeGFtcGxlIGNvbnRlbnQgLSBBcnRzIG9mIEV1cm9wZS5oNXAiLCJpYXQiOjE3NjIwOTM2NDgsImV4cCI6MTc5MzYyOTY0OH0.5XnGMY5n0jB4rynD8UcKTBAmAAN0bw1MnNdsrcX2',
 };
+
+List<H5PRequestModel> h5pList = h5pUrls.entries.map((entry) {
+  return H5PRequestModel(refName: entry.key, url: entry.value);
+}).toList();
