@@ -5,7 +5,7 @@
 ✅ Contribution and roadmap sections
 ✅ Polished formatting with emojis and syntax-highlighted code blocks
 
-# 🎯 test_h5p
+# 🎯 Lumi_H5P
 
 A new **Flutter package** that helps you **play Lumi H5P files locally** — no external H5P server required! 🚀
 
@@ -159,10 +159,13 @@ _android/app/src/main/AndroidManifest.xml_
 
 ```xml
 
+
+<!-- ✅ Under Application Tag -->
 <application
     android:name="${applicationName}"
     android:label="test_h5p"
     android:usesCleartextTraffic="true" <!-- Allow local HTTP -->
+android:networkSecurityConfig="@xml/network_security_config"<!-- Add Http Rules -->
     android:icon="@mipmap/ic_launcher">
 ```
 
@@ -170,8 +173,34 @@ _android/app/src/main/AndroidManifest.xml_
 
 Add this above the <application> tag:
 
+```xml
+<!-- ✅ Add required permissions here -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
 ```
-<uses-permission android:name="android.permission.INTERNET"/>
+
+**Add new Folder in (Project Root) Android>src>main>res**
+Create folder Named xml and create file **network_security_config.xml** and paste following code in it
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
 ```
 
 **This allows the package to fetch .h5p files from remote URLs before caching them locally.**
@@ -215,7 +244,28 @@ Together, let’s make H5P local playback simple, open-source, and reliable. �
 
 🏷️ Version
 
-## v0.1.0 – Initial Release
+## v0.4.0 – Initial Release
+
+Watch a quick demo showing how `Lumi_H5P` works in action:
+
+## 🖼️ Usage Example Screenshots
+
+Here are some screenshots of Lumi_H5P in action:
+
+![Example 1](https://drive.google.com/uc?export=view&id=1_EBOtlqdLcd6-1UMTRZYS_i8L-YvJsTw)
+![Example 2](https://drive.google.com/uc?export=view&id=1b4D2vJil-6adTlUZV-3bzDhXLx9rSUaq)
+![Example 3](https://drive.google.com/uc?export=view&id=11Gkt00aFIom7X2iS3kWya-q0H30vyJpS)
+![Example 4](https://drive.google.com/uc?export=view&id=1JJFxGNfa1eLE6dWaNOzuIQq7nz-bgj6g)
+
+## 🎬 Usage Example Video
+
+[Watch Demo Video](https://drive.google.com/file/d/1W36PnIwCx2rGX0iDNJvalznizEcWDUTt/view) 🎬
+
+## 💡 Usage Example Gif
+
+Watch the demo directly in the README:
+
+![Lumi_H5P Demo](https://drive.google.com/uc?export=view&id=1xHziKXecK4GG3fC8yLkhx4G38_vHlch-)
 
 Made with ❤️ by the community for educators, learners, and Flutter developers.
 

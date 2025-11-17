@@ -68,28 +68,33 @@ class H5PSetup {
     return tempH5p.path;
   }
 
-  /// Extracts .h5p/.zip to final folder with optional progress callback
   Future<void> extractH5P(String zipPath,
       {Function(double)? onProgress}) async {
     final dir = await getApplicationDocumentsDirectory();
     final extractPath = '${dir.path}/base/final';
 
-    final bytes = await File(zipPath).readAsBytes();
-    final archive = ZipDecoder().decodeBytes(bytes);
+    final inputFile = InputFileStream(zipPath);
+    final zipDecoder = ZipDecoder();
+    final archive = zipDecoder.decodeStream(inputFile);
 
     int totalFiles = archive.length;
     int processedFiles = 0;
 
     for (final file in archive) {
       final filename = '$extractPath/${file.name}';
+
       if (file.isFile) {
         final outFile = File(filename)..createSync(recursive: true);
         await outFile.writeAsBytes(file.content as List<int>);
       } else {
         Directory(filename).createSync(recursive: true);
       }
+
       processedFiles++;
-      if (onProgress != null) {
+
+      // Update progress less often
+      if (onProgress != null &&
+          (processedFiles % 5 == 0 || processedFiles == totalFiles)) {
         onProgress(processedFiles / totalFiles);
       }
     }
