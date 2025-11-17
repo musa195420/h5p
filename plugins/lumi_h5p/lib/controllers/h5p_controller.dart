@@ -173,26 +173,22 @@ class H5pWebView extends StatefulWidget {
 }
 
 class _H5pWebViewState extends State<H5pWebView> {
-  late final H5PLoader _loader;
-
   @override
   void initState() {
     super.initState();
-    _loader = H5PLoader();
+
     widget.controller._attachLoader();
-    _loader.prepareBaseFiles();
   }
 
   @override
   void dispose() {
-    _loader.closeServer();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String?>(
-      valueListenable: _loader.localServerUrl,
+      valueListenable: widget.controller._loader.localServerUrl,
       builder: (_, url, __) {
         if (url == null) return const SizedBox.shrink();
         return LocalH5PWebView(url: url);

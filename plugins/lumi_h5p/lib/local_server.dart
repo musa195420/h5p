@@ -38,7 +38,7 @@ Future<HttpServer> startLocalServer(String directory) async {
 
     _activeServer = server;
     debugPrint(
-        '🌐 Local server running at: http://${server.address.address}:${server.port}');
+        '🌐 Local server.dart running at: http://${server.address.address}:${server.port}');
     return server;
   } catch (e) {
     debugPrint('❌ Failed to start server: $e');
