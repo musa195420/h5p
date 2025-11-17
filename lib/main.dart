@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lumi_h5p/config.dart';
 import 'package:lumi_h5p/controllers/h5p_controller.dart';
 
 const Map<String, String> h5pUrls = {
@@ -37,7 +38,14 @@ class _TestViewState extends State<TestView> {
 
   @override
   Widget build(BuildContext context) {
-    H5pWebView webView = H5pWebView(controller: _h5pcontroller);
+    H5pWebView webView = H5pWebView(
+      controller: _h5pcontroller,
+      listenToEvents:
+          true, //only needed if you want to listen to events like marks and anything else
+      onXApiEvent: (event) {
+        debugPrint("📢 xAPI Event: $event");
+      },
+    );
     return Scaffold(
       appBar: AppBar(title: const Text("H5P Viewer Example")),
       body: Column(
@@ -53,11 +61,34 @@ class _TestViewState extends State<TestView> {
               );
             }).toList(),
           ),
-          ValueListenableBuilder<double>(
-            valueListenable: _h5pcontroller.downloadProgress,
-            builder: (_, value, __) {
-              if (value > 0 && value < 1) {
-                return LinearProgressIndicator(value: value);
+          ValueListenableBuilder<H5PLoadStatus>(
+            valueListenable: _h5pcontroller.status,
+            builder: (_, status, __) {
+              if (status == H5PLoadStatus.downloading) {
+                return Column(
+                  children: [
+                    const Text("Downloading..."),
+                    ValueListenableBuilder<double>(
+                      valueListenable: _h5pcontroller.downloadProgress,
+                      builder: (_, progress, __) =>
+                          LinearProgressIndicator(value: progress),
+                    ),
+                  ],
+                );
+              } else if (status == H5PLoadStatus.extracting) {
+                return Column(
+                  children: [
+                    const Text("Extracting... Please wait"),
+                    ValueListenableBuilder<double>(
+                      valueListenable: _h5pcontroller.downloadProgress,
+                      builder: (_, progress, __) => LinearProgressIndicator(
+                        value: progress > 0
+                            ? progress
+                            : null, // indeterminate if 0
+                      ),
+                    ),
+                  ],
+                );
               }
               return const SizedBox.shrink();
             },

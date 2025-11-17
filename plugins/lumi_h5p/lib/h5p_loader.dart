@@ -9,7 +9,7 @@ import 'tempdir.dart';
 
 class H5PLoader {
   /// Progress notifier (0 → 1)
-  final ValueNotifier<double> downloadProgress = ValueNotifier(0);
+  final ValueNotifier<double> progress = ValueNotifier(0);
 
   /// Current local server URL (null until ready)
   final ValueNotifier<String?> localServerUrl = ValueNotifier(null);
@@ -43,41 +43,36 @@ class H5PLoader {
   Future<void> loadH5P(String url) async {
     if (isLoading.value) return;
     isLoading.value = true;
-    status.value = H5PLoadStatus.downloading;
-    downloadProgress.value = 0;
 
     try {
       await closeServer();
 
-      debugPrint("⬇️ Downloading H5P from $url ...");
-      await _h5pSetup.downloadAndExtract(
-        url,
-        onProgress: (p) => downloadProgress.value = p,
-      );
+      // 1️⃣ Download stage
+      status.value = H5PLoadStatus.downloading;
+      progress.value = 0;
+      final tempH5pPath = await _h5pSetup.downloadH5P(url,
+          onProgress: (p) => progress.value = p);
 
+      // 2️⃣ Extract stage
       status.value = H5PLoadStatus.extracting;
-      final dir = await _h5pSetup.copyBaseFiles();
+      progress.value = 0;
+      await _h5pSetup.extractH5P(tempH5pPath,
+          onProgress: (p) => progress.value = p);
 
+      // 3️⃣ Start local server
+      final dir = await _h5pSetup.copyBaseFiles();
       final server = await startLocalServer(dir);
       _currentServer = server;
+
       status.value = H5PLoadStatus.ready;
-
-      final newUrl =
+      localServerUrl.value =
           "http://${server.address.address}:${server.port}?t=${DateTime.now().millisecondsSinceEpoch}";
-      localServerUrl.value = newUrl;
-      downloadProgress.value = 1.0;
 
-      debugPrint("🌐 Local server running at: $newUrl");
-    } on DioException catch (e) {
-      status.value = H5PLoadStatus.error;
-      String message = 'Network error: ${e.message}';
-      if (e.error is SocketException) {
-        message = 'No internet connection or host not found.';
-      }
-      debugPrint("❌ $message");
+      progress.value = 1.0;
+      debugPrint("🌐 Local server running at: ${localServerUrl.value}");
     } catch (e) {
       status.value = H5PLoadStatus.error;
-      debugPrint('❌ Error loading H5P: $e');
+      debugPrint("❌ Error loading H5P: $e");
     } finally {
       isLoading.value = false;
     }

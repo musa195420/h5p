@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/release
 /plugins/lumi_h5p/example/build
 pubspec.lock
+pubspec.lock

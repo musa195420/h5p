@@ -14,14 +14,14 @@ void main() {
     loader
       ..status.value = H5PLoadStatus.idle
       ..localServerUrl.value = null
-      ..downloadProgress.value = 0;
+      ..progress.value = 0;
   });
 
   test('initial values are correct', () {
     expect(loader.isLoading.value, false);
     expect(loader.status.value, H5PLoadStatus.idle);
     expect(loader.localServerUrl.value, isNull);
-    expect(loader.downloadProgress.value, 0);
+    expect(loader.progress.value, 0);
   });
 
   test('prepareBaseFiles calls copyBaseFiles()', () async {

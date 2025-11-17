@@ -2,6 +2,8 @@
 
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -9,12 +11,16 @@ class LocalH5PWebView extends StatefulWidget {
   final String url;
   final void Function(InAppWebViewController)? onWebViewCreated;
   final void Function()? onPageLoaded;
+  final bool listenToEvents; // ✅ Constructor flag
+  final void Function(Map<String, dynamic> xApiEvent)? onXApiEvent;
 
   const LocalH5PWebView({
     super.key,
     required this.url,
     this.onWebViewCreated,
     this.onPageLoaded,
+    this.listenToEvents = false,
+    this.onXApiEvent,
   });
 
   @override
@@ -46,6 +52,19 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
           ),
           onWebViewCreated: (controller) {
             widget.onWebViewCreated?.call(controller);
+            if (widget.listenToEvents) {
+              controller.addJavaScriptHandler(
+                handlerName: 'h5pEvent',
+                callback: (args) {
+                  if (args.isNotEmpty) {
+                    final jsonStr = args[0] as String;
+                    final Map<String, dynamic> jsonData =
+                        Map<String, dynamic>.from(jsonDecode(jsonStr) as Map);
+                    widget.onXApiEvent?.call(jsonData);
+                  }
+                },
+              );
+            }
           },
           onLoadStart: (controller, url) {
             debugPrint("🚀 Loading started: $url");
@@ -90,9 +109,35 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
   }
 
   void _injectJavaScriptLogging(InAppWebViewController controller) {
-    controller.evaluateJavascript(
-      source: "console.log('JavaScript Logging Enabled');",
-    );
+    final listenEvents = widget.listenToEvents ? 'true' : 'false';
+
+    final script = """
+  console.log('JavaScript Logging Enabled');
+
+  function attachListener() {
+    if (window.H5P && H5P.externalDispatcher) {
+      console.log('🔥 H5P READY – Attaching xAPI listener!');
+      H5P.externalDispatcher.on('xAPI', function(event) {
+        console.log('📡 H5P xAPI Event:', event.data.statement);
+
+        if ($listenEvents && window.flutter_inappwebview) {
+          // Send JSON string
+          window.flutter_inappwebview.callHandler(
+            'h5pEvent',
+            JSON.stringify(event.data.statement)
+          );
+        }
+      });
+    } else {
+      console.log('⏳ H5P NOT READY – retrying...');
+      setTimeout(attachListener, 500);
+    }
+  }
+
+  attachListener();
+  """;
+
+    controller.evaluateJavascript(source: script);
   }
 
   void _showBlockingSnackbar(String host) {

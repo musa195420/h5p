@@ -53,6 +53,50 @@ class H5PSetup {
     return file.path;
   }
 
+  Future<String> downloadH5P(String url, {Function(double)? onProgress}) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final tempH5p = File('${dir.path}/temp.h5p');
+
+    debugPrint('⬇️ Downloading H5P from $url ...');
+    await _dio.download(url, tempH5p.path,
+        onReceiveProgress: (received, total) {
+      if (total != -1 && onProgress != null) {
+        onProgress(received / total);
+      }
+    });
+
+    return tempH5p.path;
+  }
+
+  /// Extracts .h5p/.zip to final folder with optional progress callback
+  Future<void> extractH5P(String zipPath,
+      {Function(double)? onProgress}) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final extractPath = '${dir.path}/base/final';
+
+    final bytes = await File(zipPath).readAsBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
+
+    int totalFiles = archive.length;
+    int processedFiles = 0;
+
+    for (final file in archive) {
+      final filename = '$extractPath/${file.name}';
+      if (file.isFile) {
+        final outFile = File(filename)..createSync(recursive: true);
+        await outFile.writeAsBytes(file.content as List<int>);
+      } else {
+        Directory(filename).createSync(recursive: true);
+      }
+      processedFiles++;
+      if (onProgress != null) {
+        onProgress(processedFiles / totalFiles);
+      }
+    }
+
+    debugPrint('✅ Extraction done → $extractPath');
+  }
+
   /// Downloads a `.h5p` file, renames it to `.zip`, extracts to `/final`.
   Future<void> downloadAndExtract(String url,
       {Function(double)? onProgress}) async {

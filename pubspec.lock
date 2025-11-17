@@ -9,14 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.7"
-  args:
-    dependency: transitive
-    description:
-      name: args
-      sha256: d0481093c50b1da8910eb0bb301626d4d8eb7284aa739614d2b394ee09e3ea04
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.0"
   async:
     dependency: transitive
     description:
@@ -33,14 +25,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  build_cli_annotations:
-    dependency: transitive
-    description:
-      name: build_cli_annotations
-      sha256: e563c2e01de8974566a1998410d3f6f03521788160a02503b0b1f1a46c7b3d95
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   characters:
     dependency: transitive
     description:
@@ -89,14 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-  dhttpd:
-    dependency: transitive
-    description:
-      name: dhttpd
-      sha256: "2e24765d7569b8e0a02a441e3cf96f09cca69dfecba646e7e9f6b3ab45a2f3fe"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   dio:
     dependency: transitive
     description:
@@ -262,7 +238,7 @@ packages:
       path: "plugins/lumi_h5p"
       relative: true
     source: path
-    version: "1.0.2"
+    version: "1.0.3"
   matcher:
     dependency: transitive
     description:

@@ -36,7 +36,7 @@ class LumiH5P {
   ValueNotifier<H5PLoadStatus> get status => _loader.status;
 
   /// Returns the current download progress (0.0–1.0).
-  ValueNotifier<double> get downloadProgress => _loader.downloadProgress;
+  ValueNotifier<double> get downloadProgress => _loader.progress;
 
   /// Returns the local server URL hosting the extracted H5P content.
   ValueNotifier<String?> get localServerUrl => _loader.localServerUrl;

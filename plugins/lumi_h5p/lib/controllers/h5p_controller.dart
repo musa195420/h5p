@@ -26,8 +26,9 @@ class LumiH5PController {
     _loader.status.addListener(() {
       status.value = _loader.status.value;
     });
-    _loader.downloadProgress.addListener(() {
-      downloadProgress.value = _loader.downloadProgress.value;
+
+    _loader.progress.addListener(() {
+      downloadProgress.value = _loader.progress.value;
     });
     _loader.localServerUrl.addListener(() {
       localServerUrl.value = _loader.localServerUrl.value;
@@ -165,8 +166,15 @@ class LumiH5PController {
 
 class H5pWebView extends StatefulWidget {
   final LumiH5PController controller;
+  final bool listenToEvents;
+  final void Function(Map<String, dynamic> event)? onXApiEvent;
 
-  const H5pWebView({super.key, required this.controller});
+  const H5pWebView({
+    super.key,
+    required this.controller,
+    this.listenToEvents = false,
+    this.onXApiEvent,
+  });
 
   @override
   State<H5pWebView> createState() => _H5pWebViewState();
@@ -191,7 +199,11 @@ class _H5pWebViewState extends State<H5pWebView> {
       valueListenable: widget.controller._loader.localServerUrl,
       builder: (_, url, __) {
         if (url == null) return const SizedBox.shrink();
-        return LocalH5PWebView(url: url);
+        return LocalH5PWebView(
+          url: url,
+          listenToEvents: widget.listenToEvents,
+          onXApiEvent: widget.onXApiEvent,
+        );
       },
     );
   }
