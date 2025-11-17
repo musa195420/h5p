@@ -248,24 +248,24 @@ Together, let’s make H5P local playback simple, open-source, and reliable. �
 
 Watch a quick demo showing how `Lumi_H5P` works in action:
 
-## 🖼️ Usage Example Screenshots
-
-Here are some screenshots of Lumi_H5P in action:
-
-![Example 1](https://drive.google.com/uc?export=view&id=1_EBOtlqdLcd6-1UMTRZYS_i8L-YvJsTw)
-![Example 2](https://drive.google.com/uc?export=view&id=1b4D2vJil-6adTlUZV-3bzDhXLx9rSUaq)
-![Example 3](https://drive.google.com/uc?export=view&id=11Gkt00aFIom7X2iS3kWya-q0H30vyJpS)
-![Example 4](https://drive.google.com/uc?export=view&id=1JJFxGNfa1eLE6dWaNOzuIQq7nz-bgj6g)
-
-## 🎬 Usage Example Video
-
-[Watch Demo Video](https://drive.google.com/file/d/1W36PnIwCx2rGX0iDNJvalznizEcWDUTt/view) 🎬
-
 ## 💡 Usage Example Gif
 
 Watch the demo directly in the README:
 
-![Lumi_H5P Demo](https://drive.google.com/uc?export=view&id=1xHziKXecK4GG3fC8yLkhx4G38_vHlch-)
+![Lumi_H5P Demo](https://camo.githubusercontent.com/692d52dc69e3c91fece8aad35881b2d34c50186bc67a38d385c8f0b39da485a9/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3178487a694b5865634b34474733664338794c6b6878344733385f76486c63682d)
+
+## 🖼️ Usage Example Screenshots
+
+Here are some screenshots of Lumi_H5P in action:
+
+![Example 1](https://camo.githubusercontent.com/2810c19434106b75179fb3b706aed6bc7888856fbddc7372453f98cd5332161a/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d315f45424f746c71644c6364362d31554d54525a59535f69384c2d59764a735477)
+![Example 2](https://camo.githubusercontent.com/203e334d793db3cee3a8b13cfbe7d03d6fa2ee2fe84bb64e3d13b30957c2de5d/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3162344432764a696c2d366164546c555a562d33627a4468584c78397253556171)
+![Example 3](https://camo.githubusercontent.com/81b64de708f9e83cd834ed8cace2ede17aed2078a3f90d228953894283835922/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3131476b7430306146496f6d3758326953336b5779612d713048333076794a7053)
+![Example 4](https://camo.githubusercontent.com/1dfe17f125da2825ac76eb5d1d79e9b25ef3d1c765c33f491f530b5c4e077941/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d314a4a4678474e666131654c45366457614e4f7a75495171376e7a2d62676a3667)
+
+## 🎬 Usage Example Video
+
+[Watch Demo Video](https://drive.google.com/file/d/1W36PnIwCx2rGX0iDNJvalznizEcWDUTt/view) 🎬
 
 Made with ❤️ by the community for educators, learners, and Flutter developers.
 
