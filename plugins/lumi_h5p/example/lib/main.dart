@@ -63,14 +63,14 @@ class _TestViewState extends State<TestView> {
           ),
           ValueListenableBuilder<H5PLoadStatus>(
             valueListenable: _h5pcontroller.status,
-            builder: (_, status, __) {
+            builder: (_, status, _) {
               if (status == H5PLoadStatus.downloading) {
                 return Column(
                   children: [
                     const Text("Downloading..."),
                     ValueListenableBuilder<double>(
                       valueListenable: _h5pcontroller.downloadProgress,
-                      builder: (_, progress, __) =>
+                      builder: (_, progress, _) =>
                           LinearProgressIndicator(value: progress),
                     ),
                   ],
@@ -81,7 +81,7 @@ class _TestViewState extends State<TestView> {
                     const Text("Extracting... Please wait"),
                     ValueListenableBuilder<double>(
                       valueListenable: _h5pcontroller.downloadProgress,
-                      builder: (_, progress, __) => LinearProgressIndicator(
+                      builder: (_, progress, _) => LinearProgressIndicator(
                         value: progress > 0
                             ? progress
                             : null, // indeterminate if 0

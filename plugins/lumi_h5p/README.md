@@ -81,20 +81,48 @@ Here’s a simple example showing how to play an H5P file:
 ```dart
 import 'package:test_h5p/test_h5p.dart';
 
-LumiH5PController _h5pController = LumiH5PController();
+H5pWebView webView = H5pWebView(
+      controller: _h5pcontroller,
+      listenToEvents:
+          true, //only needed if you want to listen to events like marks and anything else
+      onXApiEvent: (event) {
+        debugPrint("📢 xAPI Event: $event");
+      },
+    );
 
-H5pWebView webView = H5pWebView(controller: _h5pController);
-
-ValueListenableBuilder<double>(
-  valueListenable: _h5pController.downloadProgress,
-  builder: (_, value, __) {
-    if (value > 0 && value < 1) {
-      return LinearProgressIndicator(value: value);
-    }
-
-    return Expanded(child: webView);
-  },
-);
+   ValueListenableBuilder<H5PLoadStatus>(
+            valueListenable: _h5pcontroller.status,
+            builder: (_, status, __) {
+              if (status == H5PLoadStatus.downloading) {
+                return Column(
+                  children: [
+                    const Text("Downloading..."),
+                    ValueListenableBuilder<double>(
+                      valueListenable: _h5pcontroller.downloadProgress,
+                      builder: (_, progress, __) =>
+                          LinearProgressIndicator(value: progress),
+                    ),
+                  ],
+                );
+              } else if (status == H5PLoadStatus.extracting) {
+                return Column(
+                  children: [
+                    const Text("Extracting... Please wait"),
+                    ValueListenableBuilder<double>(
+                      valueListenable: _h5pcontroller.downloadProgress,
+                      builder: (_, progress, __) => LinearProgressIndicator(
+                        value: progress > 0
+                            ? progress
+                            : null, // indeterminate if 0
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          Expanded(child: webView),
 ```
 
 # 🍎 iOS Configuration
@@ -244,7 +272,7 @@ Together, let’s make H5P local playback simple, open-source, and reliable. �
 
 🏷️ Version
 
-## v0.4.0 – Initial Release
+## v1.0.6 – Initial Release
 
 Watch a quick demo showing how `Lumi_H5P` works in action:
 
@@ -252,16 +280,18 @@ Watch a quick demo showing how `Lumi_H5P` works in action:
 
 Watch the demo directly in the README:
 
-![Lumi_H5P Demo](https://camo.githubusercontent.com/692d52dc69e3c91fece8aad35881b2d34c50186bc67a38d385c8f0b39da485a9/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3178487a694b5865634b34474733664338794c6b6878344733385f76486c63682d)
-
-## 🖼️ Usage Example Screenshots
-
 Here are some screenshots of Lumi_H5P in action:
 
-![Example 1](https://camo.githubusercontent.com/2810c19434106b75179fb3b706aed6bc7888856fbddc7372453f98cd5332161a/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d315f45424f746c71644c6364362d31554d54525a59535f69384c2d59764a735477)
-![Example 2](https://camo.githubusercontent.com/203e334d793db3cee3a8b13cfbe7d03d6fa2ee2fe84bb64e3d13b30957c2de5d/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3162344432764a696c2d366164546c555a562d33627a4468584c78397253556171)
-![Example 3](https://camo.githubusercontent.com/81b64de708f9e83cd834ed8cace2ede17aed2078a3f90d228953894283835922/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3131476b7430306146496f6d3758326953336b5779612d713048333076794a7053)
-![Example 4](https://camo.githubusercontent.com/1dfe17f125da2825ac76eb5d1d79e9b25ef3d1c765c33f491f530b5c4e077941/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d314a4a4678474e666131654c45366457614e4f7a75495171376e7a2d62676a3667)
+<div>
+   <img src="https://camo.githubusercontent.com/692d52dc69e3c91fece8aad35881b2d34c50186bc67a38d385c8f0b39da485a9/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3178487a694b5865634b34474733664338794c6b6878344733385f76486c63682d" alt="Lumi_H5P Demo" width="200"/>
+  <img src="https://camo.githubusercontent.com/2810c19434106b75179fb3b706aed6bc7888856fbddc7372453f98cd5332161a/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d315f45424f746c71644c6364362d31554d54525a59535f69384c2d59764a735477" alt="Example 1" width="200" style="margin-right:5px"/>
+  <img src="https://camo.githubusercontent.com/203e334d793db3cee3a8b13cfbe7d03d6fa2ee2fe84bb64e3d13b30957c2de5d/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3162344432764a696c2d366164546c555a562d33627a4468584c78397253556171" alt="Example 2" width="200" style="margin-right:5px"/>
+  <img src="https://camo.githubusercontent.com/81b64de708f9e83cd834ed8cace2ede17aed2078a3f90d228953894283835922/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3131476b7430306146496f6d3758326953336b5779612d713048333076794a7053" alt="Example 3" width="200"/>
+</div>
+
+<div>
+  <img src="https://camo.githubusercontent.com/1dfe17f125da2825ac76eb5d1d79e9b25ef3d1c765c33f491f530b5c4e077941/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d314a4a4678474e666131654c45366457614e4f7a75495171376e7a2d62676a3667" alt="Example 4" width="800"/>
+</div>
 
 ## 🎬 Usage Example Video
 
