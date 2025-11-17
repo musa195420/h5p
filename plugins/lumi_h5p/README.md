@@ -86,7 +86,7 @@ H5pWebView webView = H5pWebView(
       listenToEvents:
           true, //only needed if you want to listen to events like marks and anything else
       onXApiEvent: (event) {
-        debugPrint("📢 xAPI Event: $event");
+       h5pLog(message:📢 xAPI Event: $event);
       },
     );
 

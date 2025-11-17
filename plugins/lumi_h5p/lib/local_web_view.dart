@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:lumi_h5p/config.dart';
 
 class LocalH5PWebView extends StatefulWidget {
   final String url;
@@ -67,11 +68,11 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
             }
           },
           onLoadStart: (controller, url) {
-            debugPrint("🚀 Loading started: $url");
+            h5pLog(message: "🚀 Loading started: $url");
             setState(() => _progress = 0);
           },
           onLoadHttpError: (controller, url, statusCode, description) {
-            debugPrint("❌ HTTP Error $statusCode: $description for $url");
+            h5pLog(message: "❌ HTTP Error $statusCode: $description for $url");
             _showSnackBar("Failed to load content: $description");
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
@@ -85,17 +86,18 @@ class _LocalH5PWebViewState extends State<LocalH5PWebView> {
           onProgressChanged: (controller, progress) {
             setState(() => _progress = progress / 100);
             if (progress == 100) {
-              debugPrint("✅ Page fully loaded");
+              h5pLog(message: "✅ Page fully loaded");
               widget.onPageLoaded?.call();
             }
           },
           onLoadStop: (controller, url) {
-            debugPrint("🏁 Load completed: $url");
+            h5pLog(message: "🏁 Load completed: $url");
             _injectJavaScriptLogging(controller);
           },
           onConsoleMessage: (controller, consoleMessage) {
-            debugPrint(
-                "Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}");
+            h5pLog(
+                message:
+                    "Console [${consoleMessage.messageLevel}]: ${consoleMessage.message}");
           },
         ),
         if (_progress < 1)

@@ -16,6 +16,7 @@ class LumiH5PController {
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
   final ValueNotifier<H5PLoadStatus> status = ValueNotifier(H5PLoadStatus.idle);
   final ValueNotifier<double> downloadProgress = ValueNotifier(0.0);
+  final ValueNotifier<double> extractprogress = ValueNotifier(0.0);
   final ValueNotifier<String?> localServerUrl = ValueNotifier(null);
 
   void _attachLoader() {
@@ -27,8 +28,11 @@ class LumiH5PController {
       status.value = _loader.status.value;
     });
 
-    _loader.progress.addListener(() {
-      downloadProgress.value = _loader.progress.value;
+    _loader.downloadprogress.addListener(() {
+      downloadProgress.value = _loader.downloadprogress.value;
+    });
+    _loader.extractprogress.addListener(() {
+      extractprogress.value = _loader.extractprogress.value;
     });
     _loader.localServerUrl.addListener(() {
       localServerUrl.value = _loader.localServerUrl.value;
@@ -40,7 +44,8 @@ class LumiH5PController {
     _isQueueRunning = true;
 
     while (true) {
-      final currentList = List<H5PRequestModel>.from(requests.value);
+      List<H5PRequestModel> currentList =
+          List<H5PRequestModel>.from(requests.value);
       if (currentList.isEmpty) break;
 
       // Get next pending (undefined or failed)
@@ -51,40 +56,78 @@ class LumiH5PController {
       if (nextIndex == -1) break;
       final model = currentList[nextIndex];
 
-      debugPrint("🚀 Downloading queued H5P: ${model.refName}");
+      h5pLog(message: "🚀 Downloading queued H5P: ${model.refName}");
 
-      // Update to downloading
-      currentList[nextIndex] =
-          model.copyWith(status: H5PFileStatus.downloading);
-      requests.value = currentList;
+// FIX: update using the current list model
+      currentList[nextIndex] = currentList[nextIndex].copyWith(
+        status: H5PFileStatus.downloading,
+      );
+      requests.value = List.from(currentList);
 
       try {
         final localPath =
             await _loader.downloadInbackground(model.url, model.refName);
 
-        // Mark as downloaded and store local path
-        currentList[nextIndex] = model.copyWith(
+        // FIX: update using the current list model again
+        currentList[nextIndex] = currentList[nextIndex].copyWith(
           status: H5PFileStatus.downloaded,
           localPath: localPath,
         );
-        debugPrint("✅ Downloaded: ${model.refName} → $localPath");
+
+        h5pLog(message: "✅ Downloaded: ${model.refName} → $localPath");
       } catch (e) {
-        currentList[nextIndex] = model.copyWith(
+        currentList[nextIndex] = currentList[nextIndex].copyWith(
           status: H5PFileStatus.failed,
           error: e.toString(),
         );
-        debugPrint("❌ Failed: ${model.refName} → $e");
       }
 
-      requests.value = currentList;
+      requests.value = List.from(currentList);
     }
 
     _isQueueRunning = false;
-    debugPrint("🏁 H5P queue complete");
+    h5pLog(message: "🏁 H5P queue complete");
   }
 
-  void loadH5P(String url) {
+  void loadH5P(String url, {String? refName}) {
+    String? found = findExistingRef(url: url, refName: refName);
+    if (found != null) {
+      final model = requests.value.firstWhere((e) => e.refName == found);
+
+      if (model.localPath != null) {
+        h5pLog(
+            message:
+                "⚠️ Already downloaded. Playing local file → ${model.localPath}");
+        _loader.extractAndplayH5p(model.localPath!);
+      } else {
+        h5pLog(message: "⚠️ Exists but not downloaded fully. Re-queueing...");
+        _loader.loadH5P(url);
+      }
+      return;
+    }
     _loader.loadH5P(url);
+  }
+
+  String? findExistingRef({String? url, String? refName}) {
+    List<H5PRequestModel> list = requests.value;
+
+    // Check by URL
+    if (url != null) {
+      try {
+        final match = list.firstWhere((e) => e.url == url);
+        return match.refName;
+      } catch (_) {}
+    }
+
+    // Check by refName
+    if (refName != null) {
+      try {
+        final match = list.firstWhere((e) => e.refName == refName);
+        return match.refName;
+      } catch (_) {}
+    }
+
+    return null;
   }
 
   void showdownloadedfile(String refName) {
@@ -92,13 +135,13 @@ class LumiH5PController {
         orElse: () => H5PRequestModel(refName: '', url: ''));
 
     if (model.refName.isEmpty || model.localPath == null) {
-      debugPrint("⚠️ File not available for display: $refName");
+      h5pErrorLog(message: "⚠️ File not available for display: $refName");
       return;
     }
 
     final localFile = File(model.localPath!);
     if (!localFile.existsSync()) {
-      debugPrint("⚠️ Missing file on disk: ${model.localPath}");
+      h5pErrorLog(message: "⚠️ Missing file on disk: ${model.localPath}");
       return;
     }
   }
@@ -108,16 +151,16 @@ class LumiH5PController {
 
     if (remove) {
       current.removeWhere((e) => e.refName == model.refName);
-      debugPrint("H5P Removed request: ${model.refName}");
+      h5pLog(message: "H5P Removed request: ${model.refName}");
     } else {
       // check if it already exists -> update instead
       final index = current.indexWhere((e) => e.refName == model.refName);
       if (index != -1) {
         current[index] = model;
-        debugPrint("H5P Updated existing request: ${model.refName}");
+        h5pLog(message: "H5P Updated existing request: ${model.refName}");
       } else {
         current.add(model);
-        debugPrint("H5P Added new request: ${model.refName}");
+        h5pLog(message: "H5P Added new request: ${model.refName}");
       }
       current.sort((a, b) => b.priority.compareTo(a.priority));
       requests.value = current;
@@ -129,34 +172,58 @@ class LumiH5PController {
     requests.value = current; // notify listeners
   }
 
-  void addRequestList(List<H5PRequestModel> models, {bool remove = false}) {
+  void addRequestList(
+    List<H5PRequestModel> models, {
+    bool remove = false,
+    bool forceRefresh = false,
+  }) {
     final current = List<H5PRequestModel>.from(requests.value);
 
     for (final model in models) {
       if (remove) {
         current.removeWhere((e) => e.refName == model.refName);
-        debugPrint("H5P ❌ Removed request: ${model.refName}");
-      } else {
-        final index = current.indexWhere((e) => e.refName == model.refName);
-        if (index != -1) {
-          current[index] = model;
-          debugPrint("H5P 🔁 Updated existing request: ${model.refName}");
-        } else {
-          current.add(model);
-          debugPrint("H5P ➕ Added new request: ${model.refName}");
-        }
-        current.sort((a, b) => b.priority.compareTo(a.priority));
-        requests.value = current;
+        h5pLog(message: "H5P ❌ Removed request: ${model.refName}");
+        continue;
+      }
 
-        // Start queue if not already running
-        _processQueue();
+      final index = current.indexWhere((e) => e.refName == model.refName);
+
+      if (index != -1) {
+        final existing = current[index];
+
+        final isSameUrl = existing.url == model.url;
+        final isDownloaded = existing.status == H5PFileStatus.downloaded;
+
+        // 🚫 Skip if already downloaded and not forcing refresh
+        if (isDownloaded && isSameUrl && !forceRefresh) {
+          h5pLog(
+              message: "H5P ⏩ Skipped (already downloaded): ${model.refName}");
+          continue;
+        }
+
+        // 🔁 If forcing refresh → reset status and trigger re-download
+        if (forceRefresh) {
+          current[index] = existing.copyWith(status: H5PFileStatus.undefined);
+          h5pLog(message: "H5P 🔄 Force refresh: ${model.refName}");
+        } else {
+          // Normal update
+          current[index] = model;
+          h5pLog(message: "H5P 🔁 Updated existing request: ${model.refName}");
+        }
+      } else {
+        // ➕ New request
+        current.add(model);
+        h5pLog(message: "H5P ➕ Added new request: ${model.refName}");
       }
     }
 
-    // Sort by priority (higher first)
+    // Keep priority order
     current.sort((a, b) => b.priority.compareTo(a.priority));
 
-    requests.value = current;
+    requests.value = List.from(current);
+
+    // Start queue
+    _processQueue();
   }
 
   void clearAllRequests() {

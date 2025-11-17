@@ -8,7 +8,8 @@ import 'tempdir.dart';
 
 class H5PLoader {
   /// Progress notifier (0 → 1)
-  final ValueNotifier<double> progress = ValueNotifier(0);
+  final ValueNotifier<double> downloadprogress = ValueNotifier(0);
+  final ValueNotifier<double> extractprogress = ValueNotifier(0);
 
   /// Current local server URL (null until ready)
   final ValueNotifier<String?> localServerUrl = ValueNotifier(null);
@@ -31,7 +32,7 @@ class H5PLoader {
     if (_currentServer != null) {
       await _currentServer!.close(force: true);
       _currentServer = null;
-      debugPrint("🧹 Server closed");
+      h5pLog(message: "🧹 Server closed");
     }
   }
 
@@ -48,32 +49,37 @@ class H5PLoader {
 
       // 1️⃣ Download stage
       status.value = H5PLoadStatus.downloading;
-      progress.value = 0;
-      final tempH5pPath = await _h5pSetup.downloadH5P(url,
-          onProgress: (p) => progress.value = p);
+      downloadprogress.value = 0;
+      String tempH5pPath = await _h5pSetup.downloadH5P(url,
+          onProgress: (p) => downloadprogress.value = p);
 
-      // 2️⃣ Extract stage
-      status.value = H5PLoadStatus.extracting;
-      progress.value = 0;
-      await _h5pSetup.extractH5P(tempH5pPath,
-          onProgress: (p) => progress.value = p);
+      extractAndplayH5p(tempH5pPath);
 
       // 3️⃣ Start local server
-      final dir = await _h5pSetup.copyBaseFiles();
-      final server = await startLocalServer(dir);
-      _currentServer = server;
-
-      status.value = H5PLoadStatus.ready;
-      localServerUrl.value =
-          "http://${server.address.address}:${server.port}?t=${DateTime.now().millisecondsSinceEpoch}";
-
-      progress.value = 1.0;
-      debugPrint("🌐 Local server running at: ${localServerUrl.value}");
     } catch (e) {
       status.value = H5PLoadStatus.error;
-      debugPrint("❌ Error loading H5P: $e");
+      h5pErrorLog(message: "❌ Error loading H5P: $e");
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> extractAndplayH5p(String tempH5pPath) async {
+    // 2️⃣ Extract stage
+    status.value = H5PLoadStatus.extracting;
+    extractprogress.value = 0;
+    await _h5pSetup.extractH5P(tempH5pPath,
+        onProgress: (p) => extractprogress.value = p);
+
+    final dir = await _h5pSetup.copyBaseFiles();
+    final server = await startLocalServer(dir);
+    _currentServer = server;
+
+    status.value = H5PLoadStatus.ready;
+    localServerUrl.value =
+        "http://${server.address.address}:${server.port}?t=${DateTime.now().millisecondsSinceEpoch}";
+
+    extractprogress.value = 1.0;
+    h5pLog(message: "🌐 Local server running at: ${localServerUrl.value}");
   }
 }

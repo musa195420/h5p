@@ -2,8 +2,8 @@
 import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lumi_h5p/config.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Handles setup of the H5P environment.
@@ -29,7 +29,7 @@ class H5PSetup {
           'assets/web/$fileName', '${finalDir.path}/$fileName');
     }
 
-    debugPrint('✅ Base files copied to: ${finalDir.path}');
+    h5pLog(message: '✅ Base files copied to: ${finalDir.path}');
     return finalDir.path;
   }
 
@@ -46,7 +46,7 @@ class H5PSetup {
     await _dio.download(url, file.path, onReceiveProgress: (received, total) {
       if (total != -1) {
         final progress = (received / total * 100).toStringAsFixed(0);
-        debugPrint("⬇️ $refName → $progress%");
+        h5pLog(message: "⬇️ $refName → $progress%");
       }
     });
 
@@ -57,11 +57,11 @@ class H5PSetup {
     final dir = await getApplicationDocumentsDirectory();
     final tempH5p = File('${dir.path}/temp.h5p');
 
-    debugPrint('⬇️ Downloading H5P from $url ...');
+    h5pLog(message: '⬇️ Downloading H5P from $url ...');
     await _dio.download(url, tempH5p.path,
         onReceiveProgress: (received, total) {
       if (total != -1 && onProgress != null) {
-        onProgress(received / total);
+        // onProgress(received / total);
       }
     });
 
@@ -99,7 +99,7 @@ class H5PSetup {
       }
     }
 
-    debugPrint('✅ Extraction done → $extractPath');
+    h5pLog(message: '✅ Extraction done → $extractPath');
   }
 
   /// Downloads a `.h5p` file, renames it to `.zip`, extracts to `/final`.
@@ -111,7 +111,7 @@ class H5PSetup {
     final extractPath = '${dir.path}/base/final';
 
     // Download .h5p file with progress callback
-    debugPrint('⬇️ Downloading H5P from $url ...');
+    h5pLog(message: '⬇️ Downloading H5P from $url ...');
     await _dio.download(url, tempH5p.path,
         onReceiveProgress: (received, total) {
       if (total != -1 && onProgress != null) {
@@ -124,7 +124,7 @@ class H5PSetup {
     await tempH5p.rename(tempZip.path);
 
     // Extract
-    debugPrint('📦 Extracting H5P ...');
+    h5pLog(message: '📦 Extracting H5P ...');
     final bytes = await tempZip.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
 
@@ -138,7 +138,7 @@ class H5PSetup {
       }
     }
 
-    debugPrint('✅ Extraction done → $extractPath');
+    h5pLog(message: '✅ Extraction done → $extractPath');
   }
 
   Future<void> _copyAssetFile(String assetPath, String targetPath) async {
@@ -154,7 +154,7 @@ class H5PSetup {
         byteData.lengthInBytes,
       ));
     } catch (e) {
-      debugPrint('⚠️ Failed to copy asset: $assetPath → $e');
+      h5pErrorLog(message: '⚠️ Failed to copy asset: $assetPath → $e');
     }
   }
 }

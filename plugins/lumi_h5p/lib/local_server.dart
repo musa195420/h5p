@@ -12,11 +12,11 @@ Future<HttpServer> startLocalServer(String directory) async {
   // If server is already running, close it first
   if (_activeServer != null) {
     try {
-      debugPrint('🧹 Closing previous local server...');
+      h5pLog(message: '🧹 Closing previous local server...');
       await _activeServer!.close(force: true);
       _activeServer = null;
     } catch (e) {
-      debugPrint('⚠️ Error closing previous server: $e');
+      h5pErrorLog(message: '⚠️ Error closing previous server: $e');
     }
   }
 
@@ -37,18 +37,19 @@ Future<HttpServer> startLocalServer(String directory) async {
     );
 
     _activeServer = server;
-    debugPrint(
-        '🌐 Local server.dart running at: http://${server.address.address}:${server.port}');
+    h5pLog(
+        message:
+            '🌐 Local server.dart running at: http://${server.address.address}:${server.port}');
     return server;
   } catch (e) {
-    debugPrint('❌ Failed to start server: $e');
+    h5pErrorLog(message: '❌ Failed to start server: $e');
     rethrow;
   }
 }
 
 Future<void> stopLocalServer() async {
   if (_activeServer != null) {
-    debugPrint('🛑 Stopping local server...');
+    h5pLog(message: '🛑 Stopping local server...');
     await _activeServer!.close(force: true);
     _activeServer = null;
   }

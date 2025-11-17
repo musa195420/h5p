@@ -36,7 +36,8 @@ class LumiH5P {
   ValueNotifier<H5PLoadStatus> get status => _loader.status;
 
   /// Returns the current download progress (0.0–1.0).
-  ValueNotifier<double> get downloadProgress => _loader.progress;
+  ValueNotifier<double> get downloadProgress => _loader.downloadprogress;
+  ValueNotifier<double> get extractProgress => _loader.extractprogress;
 
   /// Returns the local server URL hosting the extracted H5P content.
   ValueNotifier<String?> get localServerUrl => _loader.localServerUrl;
@@ -57,10 +58,10 @@ class LumiH5P {
         return LocalH5PWebView(
           url: url,
           onWebViewCreated: (controller) {
-            debugPrint("🌐 WebView initialized");
+            h5pLog(message: "🌐 WebView initialized");
           },
           onPageLoaded: () {
-            debugPrint("✅ H5P page loaded successfully");
+            h5pLog(message: "✅ H5P page loaded successfully");
           },
         );
       },

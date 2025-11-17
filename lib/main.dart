@@ -2,47 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lumi_h5p/config.dart';
 import 'package:lumi_h5p/controllers/h5p_controller.dart';
+import 'package:lumi_h5p/models/h5p_request_model.dart';
+import 'package:test_h5p/constants.dart';
 
 const Map<String, String> h5pUrls = {
-  'h5purl1':
-      'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Interactive%20Video.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9JbnRlcmFjdGl2ZSBWaWRlby5oNXAiLCJpYXQiOjE3NjE1MDM4NTksImV4cCI6MTc5MzAzOTg1OX0.qMAJYEY4IsrCjhQnFFlz2jA-H0OBJyJtXiwsj5nL35k',
-  'h5purl2':
-      'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Test%20mcq.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9UZXN0IG1jcS5oNXAiLCJpYXQiOjE3NjE0OTk1OTMsImV4cCI6MTc5MzAzNTU5M30.Fb4dOMKXjTB47Ht1ot7PLcsw6qHbDWJ5FSZL8Q5Meq8',
-  'h5purl3':
-      'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Course%20Presentation.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9Db3Vyc2UgUHJlc2VudGF0aW9uLmg1cCIsImlhdCI6MTc2MjA5MzYyMSwiZXhwIjoxNzkzNjI5NjIxfQ.uguBKJCrO3O1-lnt-DIFT3LBZrwL_oAoX7LK2VUgll8',
-  'h5purl4':
-      'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Example%20content%20-%20Arts%20of%20Europe.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9FeGFtcGxlIGNvbnRlbnQgLSBBcnRzIG9mIEV1cm9wZS5oNXAiLCJpYXQiOjE3NjIwOTM2NDgsImV4cCI6MTc5MzYyOTY0OH0.5XnGMY5n0jB4rynD8UcKTBAmAAN0bw1MnNdsrcX2qmg',
+  'h5purl1': h5pUrl1,
+  'h5purl2': h5pUrl2,
+  'h5purl3': h5pUrl3,
+  'h5purl4': h5pUrl4,
 };
+
 const Map<String, Map<String, dynamic>> h5pContent = {
   'h5purl1': {
-    'url':
-        'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Interactive%20Video.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9JbnRlcmFjdGl2ZSBWaWRlby5oNXAiLCJpYXQiOjE3NjE1MDM4NTksImV4cCI6MTc5MzAzOTg1OX0.qMAJYEY4IsrCjhQnFFlz2jA-H0OBJyJtXiwsj5nL35k',
-    'title': 'Interactive Video',
+    'url': h5pUrl1,
+    'title': ' Video',
+    'subtitle': 'Watch & Learn',
     'icon': Icons.play_circle_filled,
-    'color': Colors.purple,
+    'color': Color(0xFF9C27B0), // Purple
   },
   'h5purl2': {
-    'url':
-        'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Test%20mcq.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9UZXN0IG1jcS5oNXAiLCJpYXQiOjE3NjE0OTk1OTMsImV4cCI6MTc5MzAzNTU5M30.Fb4dOMKXjTB47Ht1ot7PLcsw6qHbDWJ5FSZL8Q5Meq8',
+    'url': h5pUrl2,
     'title': 'Quiz Time',
-    'icon': Icons.quiz,
-    'color': Colors.orange,
+    'subtitle': 'Test Your Knowledge',
+    'icon': Icons.quiz_outlined,
+    'color': Color(0xFFFF9800), // Orange
   },
   'h5purl3': {
-    'url':
-        'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Course%20Presentation.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9Db3Vyc2UgUHJlc2VudGF0aW9uLmg1cCIsImlhdCI6MTc2MjA5MzYyMSwiZXhwIjoxNzkzNjI5NjIxfQ.uguBKJCrO3O1-lnt-DIFT3LBZrwL_oAoX7LK2VUgll8',
-    'title': 'Presentation',
+    'url': h5pUrl3,
+    'title': 'Course Slides',
+    'subtitle': 'Learn Step by Step',
     'icon': Icons.slideshow,
-    'color': Colors.blue,
+    'color': Color(0xFF2196F3), // Blue
   },
   'h5purl4': {
-    'url':
-        'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Example%20content%20-%20Arts%20of%20Europe.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9FeGFtcGxlIGNvbnRlbnQgLSBBcnRzIG9mIEV1cm9wZS5oNXAiLCJpYXQiOjE3NjIwOTM2NDgsImV4cCI6MTc5MzYyOTY0OH0.5XnGMY5n0jB4rynD8UcKTBAmAAN0bw1MnNdsrcX2qmg',
+    'url': h5pUrl4,
     'title': 'Arts Gallery',
+    'subtitle': 'Explore & Discover',
     'icon': Icons.palette,
-    'color': Colors.pink,
+    'color': Color(0xFFE91E63), // Pink
   },
 };
+
+List<H5PRequestModel> h5pmodels = [
+  H5PRequestModel(refName: 'h5purl1', url: h5pUrl1),
+  H5PRequestModel(refName: 'h5purl2', url: h5pUrl2),
+];
+
+List<H5PRequestModel> moreh5pmodels = [
+  H5PRequestModel(refName: 'h5purl2', url: h5pUrl2),
+  H5PRequestModel(refName: 'h5purl3', url: h5pUrl3),
+  H5PRequestModel(refName: 'h5purl4', url: h5pUrl4),
+];
+
 void main() {
   runApp(const MyApp());
 }
@@ -56,8 +67,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.purple,
-        fontFamily: 'Comic Sans MS',
+        fontFamily: 'Poppins',
         scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        useMaterial3: true,
       ),
       home: const TestView(),
     );
@@ -75,12 +87,22 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
   final LumiH5PController _h5pcontroller = LumiH5PController();
   bool _isFullscreen = false;
   String? _currentContentTitle;
-  late AnimationController _animationController;
+  late AnimationController _pulseController;
+  late AnimationController _slideController;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+    _h5pcontroller.addRequestList(h5pmodels);
+    h5pDebug = false;
+    h5pError = false;
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _slideController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
@@ -88,7 +110,8 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _pulseController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
@@ -109,12 +132,13 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
       controller: _h5pcontroller,
       listenToEvents: true,
       onXApiEvent: (event) {
-        debugPrint("📢 xAPI Event: $event");
+        h5pLog(message: "📢 xAPI Event: $event");
       },
     );
 
     if (_isFullscreen) {
       return Scaffold(
+        backgroundColor: Colors.black,
         body: Stack(
           children: [
             webView,
@@ -122,10 +146,14 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
               top: 40,
               right: 16,
               child: SafeArea(
-                child: GlassButton(
+                child: FloatingActionButton(
+                  mini: true,
                   onPressed: _toggleFullscreen,
-                  icon: Icons.fullscreen_exit,
-                  color: Colors.red,
+                  backgroundColor: Colors.white.withValues(alpha: 0.9),
+                  child: const Icon(
+                    Icons.fullscreen_exit,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ),
@@ -141,8 +169,8 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.purple.shade100,
-              Colors.blue.shade100,
+              Colors.purple.shade50,
+              Colors.blue.shade50,
               Colors.pink.shade50,
             ],
           ),
@@ -150,211 +178,161 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
         child: SafeArea(
           child: Column(
             children: [
-              // Animated Header
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.purple.shade400,
-                            Colors.pink.shade300,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.purple.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.school,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Learning Adventure! 🚀",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple.shade900,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          Text(
-                            _currentContentTitle ?? "Choose an activity",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.purple.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              _buildHeader(),
+              const SizedBox(height: 8),
+              _buildContentCards(),
+              const SizedBox(height: 12),
+              _buildLoadingStatus(),
+              _buildWebViewContainer(webView),
+              _buildRequestsList(),
+              _buildAddMoreButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.purple.shade400, Colors.pink.shade400],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.purple.withValues(alpha: 0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 ),
-              ),
-
-              // Content Selection Cards
-              Container(
-                height: 140,
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: h5pContent.length,
-                  itemBuilder: (context, index) {
-                    final entry = h5pContent.entries.elementAt(index);
-                    return ContentCard(
-                      title: entry.value['title'],
-                      icon: entry.value['icon'],
-                      color: entry.value['color'],
-                      onTap: () {
-                        _h5pcontroller.loadH5P(entry.value['url']);
-                        setState(() {
-                          _currentContentTitle = entry.value['title'];
-                        });
-                        _animationController.forward(from: 0);
-                      },
-                    );
-                  },
+              ],
+            ),
+            child: const Icon(
+              Icons.school_rounded,
+              color: Colors.white,
+              size: 36,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Learning Hub 🚀",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple.shade900,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Loading Status
-              ValueListenableBuilder<H5PLoadStatus>(
-                valueListenable: _h5pcontroller.status,
-                builder: (_, status, __) {
-                  if (status == H5PLoadStatus.downloading) {
-                    return GlassContainer(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.download,
-                                color: Colors.purple.shade600,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Downloading magic... ✨",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.purple.shade800,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          ValueListenableBuilder<double>(
-                            valueListenable: _h5pcontroller.downloadProgress,
-                            builder: (_, progress, __) => ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 8,
-                                backgroundColor: Colors.purple.shade100,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.purple.shade400,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else if (status == H5PLoadStatus.extracting) {
-                    return GlassContainer(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.unarchive,
-                                color: Colors.blue.shade600,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Preparing your activity... 🎨",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue.shade800,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          ValueListenableBuilder<double>(
-                            valueListenable: _h5pcontroller.downloadProgress,
-                            builder: (_, progress, __) => ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 8,
-                                backgroundColor: Colors.purple.shade100,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.blue.shade400,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-
-              // WebView Container
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.purple.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+                const SizedBox(height: 2),
+                Text(
+                  _currentContentTitle ?? "Choose an activity to start",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.purple.shade600,
+                    fontWeight: FontWeight.w500,
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Stack(
-                      children: [
-                        webView,
-                        Positioned(
-                          bottom: 16,
-                          right: 16,
-                          child: GlassButton(
-                            onPressed: _toggleFullscreen,
-                            icon: Icons.fullscreen,
-                            color: Colors.purple,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentCards() {
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: h5pContent.length,
+        itemBuilder: (context, index) {
+          final entry = h5pContent.entries.elementAt(index);
+          return _ContentCard(
+            title: entry.value['title'],
+            subtitle: entry.value['subtitle'],
+            icon: entry.value['icon'],
+            color: entry.value['color'],
+            onTap: () {
+              _h5pcontroller.loadH5P(entry.value['url']);
+              setState(() {
+                _currentContentTitle = entry.value['title'];
+              });
+              _slideController.forward(from: 0);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingStatus() {
+    return ValueListenableBuilder<H5PLoadStatus>(
+      valueListenable: _h5pcontroller.status,
+      builder: (_, status, __) {
+        if (status == H5PLoadStatus.downloading) {
+          return _LoadingCard(
+            icon: Icons.download_rounded,
+            message: "Downloading content... ✨",
+            color: Colors.purple,
+            controller: _h5pcontroller,
+            showProgress: true,
+          );
+        } else if (status == H5PLoadStatus.extracting) {
+          return _LoadingCard(
+            icon: Icons.folder_zip_rounded,
+            message: "Preparing your activity... 🎨",
+            color: Colors.blue,
+            controller: _h5pcontroller,
+            showProgress: false,
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildWebViewContainer(Widget webView) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withValues(alpha: 0.2),
+              blurRadius: 25,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              Container(color: Colors.white, child: webView),
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: FloatingActionButton(
+                  mini: true,
+                  onPressed: _toggleFullscreen,
+                  backgroundColor: Colors.purple.shade400,
+                  elevation: 8,
+                  child: const Icon(Icons.fullscreen, color: Colors.white),
                 ),
               ),
             ],
@@ -363,93 +341,244 @@ class _TestViewState extends State<TestView> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _buildRequestsList() {
+    return ValueListenableBuilder<List<H5PRequestModel>>(
+      valueListenable: _h5pcontroller.requests,
+      builder: (context, list, _) {
+        if (list.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          constraints: const BoxConstraints(maxHeight: 150),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Downloads",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    final req = list[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _getStatusIcon(req.status),
+                            size: 20,
+                            color: _getStatusColor(req.status),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              req.refName,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(
+                                req.status,
+                              ).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              req.status.name,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: _getStatusColor(req.status),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAddMoreButton() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ElevatedButton.icon(
+        onPressed: () {
+          _h5pcontroller.addRequestList(moreh5pmodels);
+        },
+        icon: const Icon(Icons.add_circle_outline),
+        label: const Text("Load More Activities"),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.purple.shade400,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+        ),
+      ),
+    );
+  }
+
+  IconData _getStatusIcon(H5PFileStatus status) {
+    switch (status) {
+      case H5PFileStatus.undefined:
+        return Icons.hourglass_empty;
+      case H5PFileStatus.downloading:
+        return Icons.downloading;
+      case H5PFileStatus.downloaded:
+        return Icons.check_circle;
+      case H5PFileStatus.failed:
+        return Icons.error;
+      default:
+        return Icons.info;
+    }
+  }
+
+  Color _getStatusColor(H5PFileStatus status) {
+    switch (status) {
+      case H5PFileStatus.downloading:
+        return Colors.blue;
+      case H5PFileStatus.downloaded:
+        return Colors.green;
+      case H5PFileStatus.failed:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
 }
 
-class ContentCard extends StatelessWidget {
+class _ContentCard extends StatefulWidget {
   final String title;
+  final String subtitle;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
 
-  const ContentCard({
-    super.key,
+  const _ContentCard({
     required this.title,
+    required this.subtitle,
     required this.icon,
     required this.color,
     required this.onTap,
   });
 
   @override
+  State<_ContentCard> createState() => _ContentCardState();
+}
+
+class _ContentCardState extends State<_ContentCard> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 160,
-        margin: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.8),
-              color.withValues(alpha: 0.6),
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          width: 180,
+          margin: const EdgeInsets.only(right: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [widget.color, widget.color.withValues(alpha: 0.7)],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withValues(alpha: 0.4),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
-              // Glassmorphism overlay
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.2),
-                      Colors.white.withValues(alpha: 0.1),
-                    ],
-                  ),
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Icon(
+                  widget.icon,
+                  size: 120,
+                  color: Colors.white.withValues(alpha: 0.1),
                 ),
               ),
-              // Content
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: Colors.white.withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, size: 40, color: Colors.white),
+                      child: Icon(widget.icon, size: 32, color: Colors.white),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      title,
-                      textAlign: TextAlign.center,
+                      widget.title,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 4,
-                          ),
-                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -463,10 +592,20 @@ class ContentCard extends StatelessWidget {
   }
 }
 
-class GlassContainer extends StatelessWidget {
-  final Widget child;
+class _LoadingCard extends StatelessWidget {
+  final IconData icon;
+  final String message;
+  final Color color;
+  final LumiH5PController controller;
+  final bool showProgress;
 
-  const GlassContainer({super.key, required this.child});
+  const _LoadingCard({
+    required this.icon,
+    required this.message,
+    required this.color,
+    required this.controller,
+    required this.showProgress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -477,74 +616,67 @@ class GlassContainer extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.7),
-            Colors.white.withValues(alpha: 0.4),
-          ],
+          colors: [Colors.white, color.withValues(alpha: 0.05)],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.5),
-          width: 1.5,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: child,
-    );
-  }
-}
-
-class GlassButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final Color color;
-
-  const GlassButton({
-    super.key,
-    required this.onPressed,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.5),
-                Colors.white.withValues(alpha: 0.3),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.5),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 28),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color.withValues(alpha: 0.7),
+                  ),
+                ),
               ),
             ],
           ),
-          child: Icon(icon, color: color.withValues(alpha: 0.7), size: 28),
-        ),
+          const SizedBox(height: 16),
+
+          ValueListenableBuilder<double>(
+            valueListenable: showProgress
+                ? controller.downloadProgress
+                : controller.extractprogress,
+            builder: (_, progress, __) => Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 10,
+                    backgroundColor: color.withValues(alpha: 0.1),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "${(progress * 100).toStringAsFixed(0)}%",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
