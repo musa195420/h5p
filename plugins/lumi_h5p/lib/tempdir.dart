@@ -33,7 +33,8 @@ class H5PSetup {
     return finalDir.path;
   }
 
-  Future<String> downloadFileForLater(String url, String refName) async {
+  Future<String> downloadFileForLater(String url, String refName,
+      {dynamic Function(double)? onProgress}) async {
     final dir = await getApplicationDocumentsDirectory();
     final downloadDir = Directory('${dir.path}/downloads');
     if (!downloadDir.existsSync()) {
@@ -47,10 +48,32 @@ class H5PSetup {
       if (total != -1) {
         final progress = (received / total * 100).toStringAsFixed(0);
         h5pLog(message: "⬇️ $refName → $progress%");
+        if (onProgress != null) {
+          onProgress(received / total);
+        }
       }
     });
 
     return file.path;
+  }
+
+  Future<bool> deleteFile(String path) async {
+    try {
+      final file = File(path);
+
+      if (await file.exists()) {
+        await file.delete();
+        h5pLog(message: '🗑️ Deleted file at: $path');
+        return true; // Successfully deleted
+      } else {
+        h5pLog(message: '🗑️File Not Found : $path');
+        return false; // File not found
+      }
+    } catch (e) {
+      // Optional: log error
+      h5pErrorLog(message: '⚠️ Error deleting file: $e');
+      return false; // Failed
+    }
   }
 
   Future<String> downloadH5P(String url, {Function(double)? onProgress}) async {

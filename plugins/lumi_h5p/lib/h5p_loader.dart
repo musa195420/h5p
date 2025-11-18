@@ -40,8 +40,12 @@ class H5PLoader {
     return await _h5pSetup.downloadFileForLater(url, refName);
   }
 
-  Future<void> loadH5P(String url) async {
-    if (isLoading.value) return;
+  Future<bool> deleteFile(String localPath) async {
+    return await _h5pSetup.deleteFile(localPath);
+  }
+
+  Future<String?> loadH5P(String url, {String? refName}) async {
+    if (isLoading.value) return null;
     isLoading.value = true;
 
     try {
@@ -50,15 +54,17 @@ class H5PLoader {
       // 1️⃣ Download stage
       status.value = H5PLoadStatus.downloading;
       downloadprogress.value = 0;
-      String tempH5pPath = await _h5pSetup.downloadH5P(url,
+      String tempH5pPath = await _h5pSetup.downloadFileForLater(
+          url, refName ?? url.substring(url.length - 5),
           onProgress: (p) => downloadprogress.value = p);
 
       extractAndplayH5p(tempH5pPath);
-
+      return tempH5pPath;
       // 3️⃣ Start local server
     } catch (e) {
       status.value = H5PLoadStatus.error;
       h5pErrorLog(message: "❌ Error loading H5P: $e");
+      return null;
     } finally {
       isLoading.value = false;
     }

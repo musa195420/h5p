@@ -80,7 +80,7 @@ class _TestViewState extends State<TestView> {
             children: h5pUrls.entries.map((entry) {
               return ElevatedButton(
                 onPressed: () {
-                  _h5pcontroller.loadH5P(entry.value);
+                  _h5pcontroller.loadH5P(url: entry.value, refName: entry.key);
                 },
                 child: Text(entry.key),
               );
