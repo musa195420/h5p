@@ -20,13 +20,14 @@ const Map<String, String> h5pUrls = {
 };
 
 List<H5PRequestModel> h5pmodels = [
-  H5PRequestModel(refName: 'h5purl1', url: h5pUrl1),
-  H5PRequestModel(refName: 'h5purl2', url: h5pUrl2),
+  H5PRequestModel(refName: 'h5purl1', url: h5pUrl1, priority: 6),
+  H5PRequestModel(refName: 'h5purl2', url: h5pUrl2, priority: 8),
+  H5PRequestModel(refName: 'h5purl4', url: h5pUrl4, priority: 7),
 ];
 
 List<H5PRequestModel> moreh5pmodels = [
   H5PRequestModel(refName: 'h5purl2', url: h5pUrl2),
-  // H5PRequestModel(refName: 'h5purl3', url: h5pUrl3),
+  H5PRequestModel(refName: 'h5purl3', url: h5pUrl3),
   H5PRequestModel(refName: 'h5purl4', url: h5pUrl4),
 ];
 
@@ -51,11 +52,12 @@ class TestView extends StatefulWidget {
 }
 
 class _TestViewState extends State<TestView> {
+  final Set<H5PRequestModel> _selectedRequests = {};
   final LumiH5PController _h5pcontroller = LumiH5PController();
   @override
   void initState() {
     _h5pcontroller.addRequestList(h5pmodels);
-    h5pDebug = true; // 👈 enable debug logs
+    //h5pDebug = true; // 👈 enable debug logs
     h5pError = true; // 👈 enable error logs
 
     super.initState();
@@ -75,40 +77,60 @@ class _TestViewState extends State<TestView> {
       appBar: AppBar(title: const Text("H5P Viewer Example")),
       body: Column(
         children: [
-          Wrap(
-            spacing: 8,
-            children: h5pUrls.entries.map((entry) {
-              return Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _h5pcontroller.loadH5P(
-                        url: entry.value,
-                        refName: entry.key,
-                      );
-                    },
-                    child: Text(entry.key),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      _h5pcontroller.loadH5P(url: entry.value);
-                    },
-                    child: Text("Without Ref Name ${entry.key}"),
-                  ),
-                ],
-              );
-            }).toList(),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: h5pUrls.entries.map((entry) {
+                  return Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _h5pcontroller.loadH5P(
+                              url: entry.value,
+                              refName: entry.key,
+                            );
+                          },
+                          child: Text(entry.key),
+                        ),
+                        const SizedBox(height: 6),
+                        OutlinedButton(
+                          onPressed: () {
+                            _h5pcontroller.loadH5P(url: entry.value);
+                          },
+                          child: Text("Without Ref (${entry.key})"),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
+
+          // -----------------------------
+          // LOADER SECTION
+          // -----------------------------
           ValueListenableBuilder<H5PLoadStatus>(
             valueListenable: _h5pcontroller.status,
-            builder: (_, status, _) {
+            builder: (_, status, __) {
               if (status == H5PLoadStatus.downloading) {
                 return Column(
                   children: [
                     const Text("Downloading..."),
                     ValueListenableBuilder<double>(
                       valueListenable: _h5pcontroller.downloadProgress,
-                      builder: (_, progress, _) =>
+                      builder: (_, progress, __) =>
                           LinearProgressIndicator(value: progress),
                     ),
                   ],
@@ -119,10 +141,8 @@ class _TestViewState extends State<TestView> {
                     const Text("Extracting... Please wait"),
                     ValueListenableBuilder<double>(
                       valueListenable: _h5pcontroller.extractProgress,
-                      builder: (_, progress, _) => LinearProgressIndicator(
-                        value: progress > 0
-                            ? progress
-                            : null, // indeterminate if 0
+                      builder: (_, progress, __) => LinearProgressIndicator(
+                        value: progress > 0 ? progress : null,
                       ),
                     ),
                   ],
@@ -131,35 +151,89 @@ class _TestViewState extends State<TestView> {
               return const SizedBox.shrink();
             },
           ),
+
+          // -----------------------------
+          // WEBVIEW
+          // -----------------------------
           Expanded(child: webView),
-          ValueListenableBuilder<List<H5PRequestModel>>(
-            valueListenable: _h5pcontroller.requests,
-            builder: (context, list, _) {
-              if (list.isEmpty) {
-                return const Text("No requests");
-              }
 
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final req = list[index];
+          // -----------------------------
+          // REQUEST LIST WITH SELECTION
+          // -----------------------------
+          SizedBox(
+            height: 220,
+            child: Column(
+              children: [
+                // REMOVE SELECTED BUTTON
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          final selected = _selectedRequests.toList();
+                          if (selected.isNotEmpty) {
+                            _h5pcontroller.addRequestList(
+                              selected,
+                              remove: true,
+                            );
+                            setState(() => _selectedRequests.clear());
+                          }
+                        },
+                        icon: const Icon(Icons.delete),
+                        label: const Text("Remove Selected"),
+                      ),
+                    ],
+                  ),
+                ),
 
-                  return ListTile(
-                    leading: Icon(_getStatusIcon(req.status)),
-                    title: Text(req.refName),
+                const SizedBox(height: 6),
 
-                    trailing: Text(req.status.name),
-                  );
-                },
-              );
-            },
+                // LIST
+                Expanded(
+                  child: ValueListenableBuilder<List<H5PRequestModel>>(
+                    valueListenable: _h5pcontroller.requests,
+                    builder: (context, list, _) {
+                      if (list.isEmpty) return const Text("No requests");
+
+                      return ListView.builder(
+                        itemCount: list.length,
+                        itemBuilder: (_, index) {
+                          final req = list[index];
+                          final isSelected = _selectedRequests.contains(req);
+
+                          return ListTile(
+                            leading: Checkbox(
+                              value: isSelected,
+                              onChanged: (_) {
+                                setState(() {
+                                  isSelected
+                                      ? _selectedRequests.remove(req)
+                                      : _selectedRequests.add(req);
+                                });
+                              },
+                            ),
+                            title: Text(req.refName),
+                            subtitle: Text("Status: ${req.status.name}"),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.remove_circle),
+                              onPressed: () {
+                                _h5pcontroller.addRequest(req, remove: true);
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
+
           TextButton(
-            onPressed: () {
-              _h5pcontroller.addRequestList(moreh5pmodels);
-            },
-            child: Text("Add more H5P requests"),
+            onPressed: () => _h5pcontroller.addRequestList(moreh5pmodels),
+            child: const Text("Add more H5P requests"),
           ),
         ],
       ),
