@@ -21,7 +21,6 @@ const Map<String, String> h5pUrls = {
 
 List<H5PRequestModel> h5pmodels = [
   H5PRequestModel(refName: 'h5purl1', url: h5pUrl1, priority: 6),
-  H5PRequestModel(refName: 'h5purl2', url: h5pUrl2, priority: 8),
   H5PRequestModel(refName: 'h5purl4', url: h5pUrl4, priority: 7),
 ];
 
@@ -213,10 +212,18 @@ class _TestViewState extends State<TestView> {
                                 });
                               },
                             ),
-                            title: Text(req.refName),
-                            subtitle: Text("Status: ${req.status.name}"),
+                            title: Row(
+                              children: [
+                                Text(req.refName),
+                                Spacer(),
+                                Icon(_getStatusIcon(req.status)),
+                              ],
+                            ),
+                            subtitle: Row(
+                              children: [Text("Status: ${req.status.name}")],
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.remove_circle),
+                              icon: const Icon(Icons.delete),
                               onPressed: () {
                                 _h5pcontroller.addRequest(req, remove: true);
                               },
