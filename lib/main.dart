@@ -3,6 +3,7 @@ import 'package:lumi_h5p/config.dart';
 import 'package:lumi_h5p/controllers/h5p_controller.dart';
 import 'package:lumi_h5p/models/h5p_request_model.dart';
 
+// priority url with their refnames
 const String h5pUrl1 =
     'https://rmnzqinspzgmvgxistyi.supabase.co/storage/v1/object/sign/h5p/test/Interactive%20Video.h5p?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lYTlmZWZkMS01MGQxLTQzZDgtOGUxMC1lNjBiZmNlZmNmMWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJoNXAvdGVzdC9JbnRlcmFjdGl2ZSBWaWRlby5oNXAiLCJpYXQiOjE3NjE1MDM4NTksImV4cCI6MTc5MzAzOTg1OX0.qMAJYEY4IsrCjhQnFFlz2jA-H0OBJyJtXiwsj5nL35k';
 const String h5pUrl2 =
@@ -20,7 +21,11 @@ const Map<String, String> h5pUrls = {
 };
 
 List<H5PRequestModel> h5pmodels = [
-  H5PRequestModel(refName: 'h5purl1', url: h5pUrl1, priority: 6),
+  H5PRequestModel(
+    refName: 'h5purl1',
+    url: h5pUrl1,
+    priority: 6,
+  ), // priority set it to be dowanloded first
   H5PRequestModel(refName: 'h5purl4', url: h5pUrl4, priority: 7),
 ];
 
@@ -58,6 +63,7 @@ class _TestViewState extends State<TestView> {
     _h5pcontroller.addRequestList(h5pmodels);
     //h5pDebug = true; // 👈 enable debug logs
     h5pError = true; // 👈 enable error logs
+    //h5pPort=8050; // 👈 set custom port if needed
 
     super.initState();
   }
@@ -95,17 +101,16 @@ class _TestViewState extends State<TestView> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            _h5pcontroller.loadH5P(
-                              url: entry.value,
-                              refName: entry.key,
-                            );
+                            _h5pcontroller.loadH5P(url: entry.value);
                           },
                           child: Text(entry.key),
                         ),
                         const SizedBox(height: 6),
                         OutlinedButton(
                           onPressed: () {
-                            _h5pcontroller.loadH5P(url: entry.value);
+                            _h5pcontroller.loadH5P(
+                              url: entry.value,
+                            ); //pass ref name only if already dwonlaoded
                           },
                           child: Text("Without Ref (${entry.key})"),
                         ),
@@ -122,14 +127,15 @@ class _TestViewState extends State<TestView> {
           // -----------------------------
           ValueListenableBuilder<H5PLoadStatus>(
             valueListenable: _h5pcontroller.status,
-            builder: (_, status, __) {
+            builder: (_, status, _) {
               if (status == H5PLoadStatus.downloading) {
                 return Column(
                   children: [
                     const Text("Downloading..."),
                     ValueListenableBuilder<double>(
-                      valueListenable: _h5pcontroller.downloadProgress,
-                      builder: (_, progress, __) =>
+                      valueListenable: _h5pcontroller
+                          .downloadProgress, //get progress of downloaded file
+                      builder: (_, progress, _) =>
                           LinearProgressIndicator(value: progress),
                     ),
                   ],
@@ -139,8 +145,9 @@ class _TestViewState extends State<TestView> {
                   children: [
                     const Text("Extracting... Please wait"),
                     ValueListenableBuilder<double>(
-                      valueListenable: _h5pcontroller.extractProgress,
-                      builder: (_, progress, __) => LinearProgressIndicator(
+                      valueListenable: _h5pcontroller
+                          .extractProgress, //get progress of extratced file
+                      builder: (_, progress, _) => LinearProgressIndicator(
                         value: progress > 0 ? progress : null,
                       ),
                     ),
@@ -170,7 +177,8 @@ class _TestViewState extends State<TestView> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: () {
-                          final selected = _selectedRequests.toList();
+                          List<H5PRequestModel> selected = _selectedRequests
+                              .toList();
                           if (selected.isNotEmpty) {
                             _h5pcontroller.addRequestList(
                               selected,
@@ -181,6 +189,15 @@ class _TestViewState extends State<TestView> {
                         },
                         icon: const Icon(Icons.delete),
                         label: const Text("Remove Selected"),
+                      ),
+
+                      Spacer(),
+                      TextButton(
+                        onPressed: () {
+                          _h5pcontroller
+                              .clearAllRequests(); //remove all h5p files
+                        },
+                        child: Text("Clear ALL"),
                       ),
                     ],
                   ),
@@ -225,7 +242,10 @@ class _TestViewState extends State<TestView> {
                             trailing: IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                _h5pcontroller.addRequest(req, remove: true);
+                                _h5pcontroller.addRequest(
+                                  req,
+                                  remove: true,
+                                ); // remove and clear memory
                               },
                             ),
                           );
@@ -239,7 +259,9 @@ class _TestViewState extends State<TestView> {
           ),
 
           TextButton(
-            onPressed: () => _h5pcontroller.addRequestList(moreh5pmodels),
+            onPressed: () => _h5pcontroller.addRequestList(
+              moreh5pmodels,
+            ), //add more h5p files to download
             child: const Text("Add more H5P requests"),
           ),
         ],

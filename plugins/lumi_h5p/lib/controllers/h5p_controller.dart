@@ -147,7 +147,7 @@ class LumiH5PController {
       }
 
       // fallback: instant play & requeue
-      playH5pInstantly(url!, refName: refName);
+      playH5pInstantly(url, refName: refName);
       return;
     }
 

@@ -1,10 +1,3 @@
-✅ Clear overview and features
-✅ Usage example
-✅ Complete iOS & Android configuration
-✅ Installation steps
-✅ Contribution and roadmap sections
-✅ Polished formatting with emojis and syntax-highlighted code blocks
-
 # 🎯 Lumi_H5P
 
 A new **Flutter package** that helps you **play Lumi H5P files locally** — no external H5P server required! 🚀
@@ -15,7 +8,7 @@ Bring interactive H5P learning experiences directly into your Flutter apps — *
 
 ## 📱 About
 
-**test_h5p** enables developers and educators to **load, download, and play H5P interactive content** directly on mobile devices.  
+**lumi_h5p** enables developers and educators to **load, download, and play H5P interactive content** directly on mobile devices.  
 It’s especially useful for **offline schooling or e-learning environments**, where access to an H5P server is limited or unavailable.
 
 ---
@@ -33,6 +26,16 @@ It’s especially useful for **offline schooling or e-learning environments**, w
 - 🧩 Improved rendering and user interface
 
 ---
+
+## For Improvements And Suggestions Raise Issue
+
+https://github.com/musa195420/h5p/issues
+
+**Github Link**
+https://github.com/musa195420/h5p/tree/auto
+
+**Connect With Me Through**
+https://muhammad-musa.netlify.app/
 
 ## 🧩 How It Works
 
@@ -286,11 +289,11 @@ Here are some screenshots of Lumi_H5P in action:
    <img src="https://camo.githubusercontent.com/692d52dc69e3c91fece8aad35881b2d34c50186bc67a38d385c8f0b39da485a9/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3178487a694b5865634b34474733664338794c6b6878344733385f76486c63682d" alt="Lumi_H5P Demo" width="200"/>
   <img src="https://camo.githubusercontent.com/2810c19434106b75179fb3b706aed6bc7888856fbddc7372453f98cd5332161a/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d315f45424f746c71644c6364362d31554d54525a59535f69384c2d59764a735477" alt="Example 1" width="200" style="margin-right:5px"/>
   <img src="https://camo.githubusercontent.com/203e334d793db3cee3a8b13cfbe7d03d6fa2ee2fe84bb64e3d13b30957c2de5d/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3162344432764a696c2d366164546c555a562d33627a4468584c78397253556171" alt="Example 2" width="200" style="margin-right:5px"/>
-  <img src="https://camo.githubusercontent.com/81b64de708f9e83cd834ed8cace2ede17aed2078a3f90d228953894283835922/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3131476b7430306146496f6d3758326953336b5779612d713048333076794a7053" alt="Example 3" width="200"/>
-</div>
-
+ </div>
 <div>
-  <img src="https://camo.githubusercontent.com/1dfe17f125da2825ac76eb5d1d79e9b25ef3d1c765c33f491f530b5c4e077941/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d314a4a4678474e666131654c45366457614e4f7a75495171376e7a2d62676a3667" alt="Example 4" width="800"/>
+  
+  <img src="https://camo.githubusercontent.com/81b64de708f9e83cd834ed8cace2ede17aed2078a3f90d228953894283835922/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d3131476b7430306146496f6d3758326953336b5779612d713048333076794a7053" alt="Example 3" width="120"/>
+  <img src="https://camo.githubusercontent.com/1dfe17f125da2825ac76eb5d1d79e9b25ef3d1c765c33f491f530b5c4e077941/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d314a4a4678474e666131654c45366457614e4f7a75495171376e7a2d62676a3667" alt="Example 4" width="400"/>
 </div>
 
 ## 🎬 Usage Example Video
